@@ -212,7 +212,8 @@ public class DecisionTree {
      * @param args none
      */
     public static void main(String[] args) {
-        DecisionTree dt = new DecisionTree("res/weather.nominal.arff");
+        DecisionTree dt = new DecisionTree("Übung/Blatt1/Aufgabe5/res/weather" +
+                ".nominal.arff");
         dt.testPrint();
     }
 }
