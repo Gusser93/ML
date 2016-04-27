@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 //TODO exceptions
-//TODO better dataset, attribute and co
 /**
  * Created by Markus Vieth on 21.04.2016.
  */
@@ -69,18 +68,29 @@ public class DecisionTree {
         }
     }
 
+
+    // Implement a method informationGain that takes two arguments: attribute A
+    // and a list of indices i 1 , i 2 , i m .
     /**
      * calculates information gain for given attribute and instances
      * @param attribute given attribute
      * @param indices given indices of instances
      * @return information gain
      */
-    public double informationGain(Attribute attribute, int... indices) {
-        List<Attribute> attributes = dataset.getAttributes();
-        // I assume that the last attribute is the class attribute.
-        // Alternative there could be a member variable in data set
-        Attribute classAttr = attributes.get(attributes.size() - 1);
-        //TODO test if nominal
+    public double informationGain(Attribute attribute, List<Integer> indices) {
+        List<Attribute> attributes = this.dataset.getAttributes();
+        Attribute classAttr = attributes.get(this.dataset.getClassIndex());
+
+        //TODO throw Exception
+        // Check if nominal
+        if (!attribute.isNominal()) {
+            System.err.println(attribute.getName() + "is not nominal");
+            return Double.NaN;
+        } else if (!classAttr.isNominal()) {
+            System.err.println(classAttr.getName() + "is not nominal");
+            return Double.NaN;
+        }
+
         NominalAttribute attr = (NominalAttribute) attribute;
         // Init gain
         double gain = calculateEntropy((NominalAttribute)classAttr,
@@ -105,35 +115,13 @@ public class DecisionTree {
                     subIndices);
 
             // see formula
-            gain -= entropy * ((double)subIndices.size())/((double)indices.length);
+            gain -= entropy * ((double)subIndices.size())
+                    /((double)indices.size());
         }
 
         return gain;
     }
 
-    /**
-     * calculates entropy
-     * @param classAttr given class attribute
-     * @param indices indices of instances
-     * @return entropy
-     */
-    private double calculateEntropy(NominalAttribute classAttr, int[] indices
-    ) {
-        int[] values = new int[classAttr.getNumberOfValues()];
-        // calculates number of instances with value v in class attribute
-        for (int v = 0; v < classAttr.getNumberOfValues(); v++) {
-            values[v] = 0;
-            for(int i : indices) {
-                Instance instance = data[i];
-                NominalValue value = (NominalValue)instance.getValue(classAttr);
-                NominalValue classValue = classAttr.getValue(v);
-                if (classValue.equals(value)) {
-                    values[v]++;
-                }
-            }
-        }
-        return calculateEntropy(values);
-    }
 
     /**
      * calculates entropy
@@ -191,13 +179,14 @@ public class DecisionTree {
         return Math.log(a) / Math.log(2);
     }
 
+
     /**
      * prints some test data
      */
     private void testPrint() {
-        int[] indices = new int[data.length];
+        List<Integer> indices = new ArrayList<>();
         for (int i = 0; i < data.length; i++) {
-            indices[i] = i;
+            indices.add(i);
         }
         for (Attribute attr : this.dataset.getAttributes()) {
             System.out.print("Attribute " + attr.getName());
@@ -212,8 +201,7 @@ public class DecisionTree {
      * @param args none
      */
     public static void main(String[] args) {
-        DecisionTree dt = new DecisionTree("Übung/Blatt1/Aufgabe5/res/weather" +
-                ".nominal.arff");
+        DecisionTree dt = new DecisionTree("res/weather.nominal.arff");
         dt.testPrint();
     }
 }
