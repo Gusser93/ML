@@ -10,6 +10,52 @@ import java.util.List;
  */
 public class DecisionTree {
 
+    /**
+     * Inner Node class
+     */
+    private class Node {
+        Attribute attribute = null;
+        boolean isClassAttribute = false;
+
+        /**
+         * Constructor
+         * @param attr
+         */
+        public Node(Attribute attr) {
+            this.attribute = attr;
+        }
+
+        /**
+         * Constructor
+         * @param attr
+         * @param isClassAttr
+         */
+        public Node(Attribute attr, boolean isClassAttr) {
+            this.attribute = attr;
+            this.isClassAttribute = isClassAttr;
+        }
+    }
+
+
+    /**
+     * Edge class
+     */
+    private class Edge {
+        Value value = null;
+
+        /**
+         * Constructor
+         * @param value
+         */
+        public Edge(Value value) {
+            this.value = value;
+        }
+    }
+
+
+
+
+
     private Instance[] data;
     private Dataset dataset;
 
