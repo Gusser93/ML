@@ -54,6 +54,8 @@ public class DecisionTree {
 
 
 
+    private List<Node> nodes = new ArrayList<>();
+    private List<Edge> edges = new ArrayList<>();
 
     private Instance[] data;
     private Dataset dataset;
@@ -63,6 +65,73 @@ public class DecisionTree {
      */
     public DecisionTree() {
         
+    }
+
+
+    /**
+     *
+     * @param node
+     * @return
+     */
+    public Attribute selectAttribute(Node node) {
+        Attribute select = null;
+        double maxGain = -1.0;
+        for (Attribute attribute : dataset.getAttributes()) {
+            double gain = this.informationGain(attribute, node.indices);
+            if (gain > maxGain) {
+                select = attribute;
+            }
+        }
+
+        return select;
+    }
+
+    public void train() {
+        List<Integer> trainset = this.getTrainset();
+
+        // create Node with attribute with biggest informationGain
+        Node n = new Node(trainset);
+
+        this.train_recursive(n);
+    }
+
+    public void train_recursive(Node n) {
+        // todo remove attributes to prevet duplicates
+        // todo add leafs
+
+        n.attribute = this.selectAttribute(n);
+        this.nodes.add(n);
+
+        for (Integer idx : n.indices) {
+            Instance i = this.data[idx];
+            Value v = i.getValue(n.attribute);
+
+            // check if node has an edge with given value
+            Edge edge = null;
+            for (Edge e : n.edges) {
+                if (e.value == v) {
+                    edge = e;
+                }
+            }
+
+            // create edge and add index to child node
+            if (edge == null) {
+                List<Integer> childIndices = new ArrayList<>();
+                childIndices.add(idx);
+                Node child = new Node(childIndices);
+
+                edge = new Edge(v, child);
+                this.edges.add(edge);
+            } else {
+                edge.start.indices.add(idx);
+            }
+
+        }
+
+        // create tree
+        for (Edge e : n.edges) {
+            this.train_recursive(e.start);
+        }
     }
 
     /**
@@ -214,18 +283,6 @@ public class DecisionTree {
         return entropy;
     }
 
-    public Attribute selectAttribute(Node node) {
-        Attribute select = null;
-        double maxGain = -1.0;
-        for (Attribute attribute : dataset.getAttributes()) {
-            double gain = this.informationGain(attribute, node.indices);
-            if (gain > maxGain) {
-                select = attribute;
-            }
-        }
-
-        return select;
-    }
 
     /**
      * calculates log to base 2
