@@ -3,6 +3,7 @@ import org.kramerlab.teaching.ml.datasets.*;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 //TODO exceptions
 /**
@@ -63,6 +64,7 @@ public class DecisionTree {
      * default constructor
      */
     public DecisionTree() {
+        
     }
 
     /**
@@ -227,6 +229,35 @@ public class DecisionTree {
 
 
     /**
+     * @return 2/3 trainset
+     */
+    public List<Integer> getTrainset() {
+        // get List with all indices
+        List<Integer> indices = new ArrayList<>();
+        for (int i = 0; i < this.data.length; i++) {
+            indices.add(i);
+        }
+
+        // get 2/3 of the data
+        List<Integer> trainIndices = new ArrayList<Integer>();
+
+        // get random indices
+        int size = indices.size() * 2/3;
+        while (trainIndices.size() < size) {
+            // add random element to trainIndices
+            Random random = new Random();
+            Integer randomIdx = random.nextInt(indices.size());
+            trainIndices.add(indices.get(randomIdx));
+            // remove Element from all indices
+            indices.remove(randomIdx);
+        }
+
+        return trainIndices;
+    }
+
+
+
+    /**
      * prints some test data
      */
     private void testPrint() {
@@ -234,12 +265,16 @@ public class DecisionTree {
         for (int i = 0; i < data.length; i++) {
             indices.add(i);
         }
-        for (Attribute attr : this.dataset.getAttributes()) {
+        System.out.println(indices);
+
+        /*for (Attribute attr : this.dataset.getAttributes()) {
             System.out.print("Attribute " + attr.getName());
             System.out.print(" has an InformationGain of " + informationGain
                     (attr, indices));
             System.out.println();
-        }
+        }*/
+
+        System.out.println(this.getTrainset());
     }
 
     /**
