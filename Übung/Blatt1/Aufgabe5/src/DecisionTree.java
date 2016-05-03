@@ -15,24 +15,18 @@ public class DecisionTree {
      */
     private class Node {
         Attribute attribute = null;
-        boolean isClassAttribute = false;
-
+        List<Edge> edges = new ArrayList<>();
+        List<Integer> indices;
         /**
          * Constructor
-         * @param attr
+         * @param indices
          */
-        public Node(Attribute attr) {
-            this.attribute = attr;
+        public Node(List<Integer> indices) {
+            this.indices = indices;
         }
 
-        /**
-         * Constructor
-         * @param attr
-         * @param isClassAttr
-         */
-        public Node(Attribute attr, boolean isClassAttr) {
-            this.attribute = attr;
-            this.isClassAttribute = isClassAttr;
+        public void addEdge(Edge edge) {
+            this.edges.add(edge);
         }
     }
 
@@ -42,13 +36,17 @@ public class DecisionTree {
      */
     private class Edge {
         Value value = null;
+        Node start;
+        Node end;
 
         /**
          * Constructor
          * @param value
          */
-        public Edge(Value value) {
+        public Edge(Value value, Node start) {
             this.value = value;
+            this.start = start;
+            this.start.addEdge(this);
         }
     }
 
@@ -212,6 +210,19 @@ public class DecisionTree {
         }
 
         return entropy;
+    }
+
+    public Attribute selectAttribute(Node node) {
+        Attribute select = null;
+        double maxGain = -1.0;
+        for (Attribute attribute : dataset.getAttributes()) {
+            double gain = this.informationGain(attribute, node.indices);
+            if (gain > maxGain) {
+                select = attribute;
+            }
+        }
+
+        return select;
     }
 
     /**
