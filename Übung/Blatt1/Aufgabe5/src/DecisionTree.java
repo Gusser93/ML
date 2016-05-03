@@ -3,6 +3,7 @@ import org.kramerlab.teaching.ml.datasets.*;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 //TODO exceptions
 /**
@@ -53,6 +54,8 @@ public class DecisionTree {
 
 
 
+    private List<Node> nodes = new ArrayList<>();
+    private List<Edge> edges = new ArrayList<>();
 
     private Instance[] data;
     private Dataset dataset;
@@ -61,6 +64,74 @@ public class DecisionTree {
      * default constructor
      */
     public DecisionTree() {
+        
+    }
+
+
+    /**
+     *
+     * @param node
+     * @return
+     */
+    public Attribute selectAttribute(Node node) {
+        Attribute select = null;
+        double maxGain = -1.0;
+        for (Attribute attribute : dataset.getAttributes()) {
+            double gain = this.informationGain(attribute, node.indices);
+            if (gain > maxGain) {
+                select = attribute;
+            }
+        }
+
+        return select;
+    }
+
+    public void train() {
+        List<Integer> trainset = this.getTrainset();
+
+        // create Node with attribute with biggest informationGain
+        Node n = new Node(trainset);
+
+        this.train_recursive(n);
+    }
+
+    public void train_recursive(Node n) {
+        // todo remove attributes to prevet duplicates
+        // todo add leafs
+
+        n.attribute = this.selectAttribute(n);
+        this.nodes.add(n);
+
+        for (Integer idx : n.indices) {
+            Instance i = this.data[idx];
+            Value v = i.getValue(n.attribute);
+
+            // check if node has an edge with given value
+            Edge edge = null;
+            for (Edge e : n.edges) {
+                if (e.value == v) {
+                    edge = e;
+                }
+            }
+
+            // create edge and add index to child node
+            if (edge == null) {
+                List<Integer> childIndices = new ArrayList<>();
+                childIndices.add(idx);
+                Node child = new Node(childIndices);
+
+                edge = new Edge(v, child);
+                this.edges.add(edge);
+            } else {
+                edge.start.indices.add(idx);
+            }
+
+        }
+
+        // create tree
+        for (Edge e : n.edges) {
+            this.train_recursive(e.start);
+        }
     }
 
     /**
@@ -212,18 +283,6 @@ public class DecisionTree {
         return entropy;
     }
 
-    public Attribute selectAttribute(Node node) {
-        Attribute select = null;
-        double maxGain = -1.0;
-        for (Attribute attribute : dataset.getAttributes()) {
-            double gain = this.informationGain(attribute, node.indices);
-            if (gain > maxGain) {
-                select = attribute;
-            }
-        }
-
-        return select;
-    }
 
     /**
      * calculates log to base 2
@@ -238,6 +297,35 @@ public class DecisionTree {
 
 
     /**
+     * @return 2/3 trainset
+     */
+    public List<Integer> getTrainset() {
+        // get List with all indices
+        List<Integer> indices = new ArrayList<>();
+        for (int i = 0; i < this.data.length; i++) {
+            indices.add(i);
+        }
+
+        // get 2/3 of the data
+        List<Integer> trainIndices = new ArrayList<Integer>();
+
+        // get random indices
+        int size = indices.size() * 2/3;
+        while (trainIndices.size() < size) {
+            // add random element to trainIndices
+            Random random = new Random();
+            Integer randomIdx = random.nextInt(indices.size());
+            trainIndices.add(indices.get(randomIdx));
+            // remove Element from all indices
+            indices.remove(randomIdx);
+        }
+
+        return trainIndices;
+    }
+
+
+
+    /**
      * prints some test data
      */
     private void testPrint() {
@@ -245,12 +333,16 @@ public class DecisionTree {
         for (int i = 0; i < data.length; i++) {
             indices.add(i);
         }
-        for (Attribute attr : this.dataset.getAttributes()) {
+        System.out.println(indices);
+
+        /*for (Attribute attr : this.dataset.getAttributes()) {
             System.out.print("Attribute " + attr.getName());
             System.out.print(" has an InformationGain of " + informationGain
                     (attr, indices));
             System.out.println();
-        }
+        }*/
+
+        System.out.println(this.getTrainset());
     }
 
     /**
