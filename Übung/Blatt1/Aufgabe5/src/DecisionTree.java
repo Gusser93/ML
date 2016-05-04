@@ -47,9 +47,9 @@ public class DecisionTree {
 
         public void print(String prefix) {
             if (isSingleNode) {
-                System.out.println(prefix + "\t" + value);
+                System.out.println(prefix + " " + value);
             } else {
-                System.out.println(prefix + "\t" + attribute);
+                System.out.println(prefix + " " + attribute);
             }
             for(Edge edge : edges) {
                 edge.end.print(prefix+'-');
@@ -144,7 +144,7 @@ public class DecisionTree {
         // todo remove attributes to prevet duplicates
 
         // exit function
-        if (n.isSingleNode || this.isSingleNode(n)) {
+        if (this.isSingleNode(n)) {
             return;
         }
         //select attribute with biggest informationGain
@@ -163,15 +163,12 @@ public class DecisionTree {
         for (Integer idx : n.indices) {
             Instance i = this.data[idx];
             Value v = i.getValue(n.attribute);
-            //System.out.println(v);
-            //System.out.println(idx);
 
 
 
             // add index to right edge
             for (Edge edge : n.edges) {
                 if (edge.value.equals(v)) {
-                    //System.out.println(idx);
                     edge.end.indices.add(idx);
                     break;
                 }
@@ -192,7 +189,8 @@ public class DecisionTree {
      */
     private boolean isSingleNode(Node node) {
 
-        if (node.indices.size() == 0) {
+        if (node.indices.size() == 0 || node.notVisited.size() == 0 || (node
+                .notVisited.size() == 1 && node.notVisited.contains(classAttribute))) {
             node.value = mostCommonValue(node.parent, this.classAttribute);
             node.isSingleNode = true;
             return true;
@@ -510,15 +508,12 @@ public class DecisionTree {
         }*/
 
         List<Integer> trainset = this.getTrainset();
-        System.out.println(Arrays.toString(trainset.toArray()));
-
 
         this.train(trainset);
-        System.out.println(this.classify(this.getInverseSet(trainset)));
     }
 
     private void printTree() {
-        //root.print("");
+        root.print("");
     }
 
     /**
