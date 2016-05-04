@@ -18,6 +18,9 @@ public class DecisionTree {
         Attribute attribute = null;
         List<Edge> edges = new ArrayList<>();
         List<Integer> indices;
+        boolean isSingleNode = false;
+        Value value;
+
         /**
          * Constructor
          * @param indices
@@ -28,6 +31,12 @@ public class DecisionTree {
 
         public void addEdge(Edge edge) {
             this.edges.add(edge);
+        }
+
+        public Value getValue() {
+            if (isSingleNode)
+                return value;
+            return null;
         }
     }
 
@@ -58,6 +67,7 @@ public class DecisionTree {
 
     private Instance[] data;
     private Dataset dataset;
+    private Attribute classAttribute;
 
     /**
      * default constructor
@@ -98,8 +108,14 @@ public class DecisionTree {
         // todo remove attributes to prevet duplicates
         // todo add leafs
 
+
+        if (this.isSingleNode(n)) {
+            return;
+        }
         //select attribute with biggest informationGain
         n.attribute = this.selectAttribute(n);
+
+
 
         for (Integer idx : n.indices) {
             Instance i = this.data[idx];
@@ -131,6 +147,26 @@ public class DecisionTree {
         for (Edge e : n.edges) {
             this.train_recursive(e.end);
         }
+    }
+
+    private boolean isSingleNode(Node node) {
+
+        if (node.indices.size() == 0) {
+            return false;
+        }
+
+        Value value = data[node.indices.get(0)].getValue(classAttribute);
+
+        for (int i = 1; i < node.indices.size(); i++) {
+            Instance instance = data[node.indices.get(i)];
+            if (! instance.getValue(classAttribute).equals(value)) {
+                return false;
+            }
+        }
+
+        node.isSingleNode = true;
+        node.value = value;
+        return true;
     }
 
     /**
@@ -180,6 +216,8 @@ public class DecisionTree {
         for (int i = 0; i < data.length; i++) {
             this.data[i] = dataset.getInstance(i);
         }
+        this.classAttribute = this.dataset.getAttributes().get(this.dataset
+                .getClassIndex());
     }
 
 
