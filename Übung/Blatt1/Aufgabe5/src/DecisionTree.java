@@ -152,6 +152,7 @@ public class DecisionTree {
     private boolean isSingleNode(Node node) {
 
         if (node.indices.size() == 0) {
+            //TODO default value
             return false;
         }
 
