@@ -118,14 +118,11 @@ public class DecisionTree {
                 continue;
             }
             double gain = this.informationGain(attribute, node.indices);
-            System.out.println("Gain for " + attribute + " = " + gain);
             if (gain > maxGain) {
                 maxGain = gain;
                 select = attribute;
             }
         }
-        System.out.println(select);
-        System.out.println();
         return select;
     }
 
@@ -511,8 +508,8 @@ public class DecisionTree {
         }*/
 
         List<Integer> trainset = this.getTrainset();
-        this.train(indices);
-        System.out.println(this.classify(this.getInverseSet(indices)));
+        this.train(trainset);
+        System.out.println(this.classify(this.getInverseSet(trainset)));
     }
 
     private void printTree() {
