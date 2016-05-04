@@ -17,6 +17,7 @@ public class DecisionTree {
         Attribute attribute = null;
         List<Edge> edges = new ArrayList<>();
         List<Integer> indices;
+        List<Attribute> notVisited;
         boolean isSingleNode = false;
         Value value;
 
@@ -27,6 +28,11 @@ public class DecisionTree {
         public Node(List<Integer> indices, Node parent) {
             this.indices = indices;
             this.parent = parent;
+            if (parent == null) {
+                notVisited = dataset.getAttributes();
+            } else {
+                notVisited = parent.notVisited;
+            }
         }
 
         public void addEdge(Edge edge) {
@@ -48,6 +54,11 @@ public class DecisionTree {
             for(Edge edge : edges) {
                 edge.end.print(prefix+'-');
             }
+        }
+
+        public void setAttribute(Attribute attribute) {
+            this.attribute = attribute;
+            this.notVisited.remove(attribute);
         }
     }
 
@@ -96,7 +107,7 @@ public class DecisionTree {
     public Attribute selectAttribute(Node node) {
         Attribute select = null;
         double maxGain = Double.NEGATIVE_INFINITY;
-        for (Attribute attribute : dataset.getAttributes()) {
+        for (Attribute attribute : node.notVisited) {
             if (attribute.equals(classAttribute)) {
                 continue;
             }
@@ -106,7 +117,6 @@ public class DecisionTree {
                 select = attribute;
             }
         }
-        System.out.println(node.indices);
         System.out.println(select);
         return select;
     }
@@ -124,11 +134,11 @@ public class DecisionTree {
         // todo remove attributes to prevet duplicates
 
         // exit function
-        if (this.isSingleNode(n)) {
+        if (n.isSingleNode || this.isSingleNode(n)) {
             return;
         }
         //select attribute with biggest informationGain
-        n.attribute = this.selectAttribute(n);
+        n.setAttribute(this.selectAttribute(n));
 
         // create edges for each value of the attribute
         NominalAttribute attr = (NominalAttribute)n.attribute;
@@ -270,8 +280,7 @@ public class DecisionTree {
      * @return information gain
      */
     public double informationGain(Attribute attribute, List<Integer> indices) {
-        List<Attribute> attributes = this.dataset.getAttributes();
-        Attribute classAttr = attributes.get(this.dataset.getClassIndex());
+        Attribute classAttr = classAttribute;
 
         //TODO throw Exception
         // Check if nominal
@@ -287,7 +296,6 @@ public class DecisionTree {
         // Init gain
         double gain = calculateEntropy((NominalAttribute)classAttr,
                 indices);
-
         // sum over all values in attribute
         for (int v = 0; v < attr.getNumberOfValues(); v++) {
             List<Integer> subIndices = new ArrayList<>();
@@ -303,8 +311,11 @@ public class DecisionTree {
             }
 
             // calculates entropy
-            double entropy = calculateEntropy((NominalAttribute)classAttr,
-                    subIndices);
+            double entropy = 0.0;
+            if (subIndices.size() != 0) {
+                entropy = calculateEntropy((NominalAttribute)classAttr,
+                        subIndices);
+            }
 
             // see formula
             gain -= entropy * ((double)subIndices.size())
@@ -351,7 +362,6 @@ public class DecisionTree {
             sum += i;
         }
         double entropy = 0.0;
-
         for (int value : values) {
             double p = value/sum;
             entropy -= p * log2(p);
