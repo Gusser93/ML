@@ -1,9 +1,7 @@
 import org.kramerlab.teaching.ml.datasets.*;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 //TODO exceptions
 /**
@@ -15,6 +13,7 @@ public class DecisionTree {
      * Inner Node class
      */
     private class Node {
+        Node parent;
         Attribute attribute = null;
         List<Edge> edges = new ArrayList<>();
         List<Integer> indices;
@@ -25,8 +24,9 @@ public class DecisionTree {
          * Constructor
          * @param indices
          */
-        public Node(List<Integer> indices) {
+        public Node(List<Integer> indices, Node parent) {
             this.indices = indices;
+            this.parent = parent;
         }
 
         public void addEdge(Edge edge) {
@@ -37,6 +37,17 @@ public class DecisionTree {
             if (isSingleNode)
                 return value;
             return null;
+        }
+
+        public void print(String prefix) {
+            if (isSingleNode) {
+                System.out.println(prefix + "\t" + value);
+            } else {
+                System.out.println(prefix + "\t" + attribute);
+            }
+            for(Edge edge : edges) {
+                edge.end.print(prefix+'-');
+            }
         }
     }
 
@@ -84,14 +95,19 @@ public class DecisionTree {
      */
     public Attribute selectAttribute(Node node) {
         Attribute select = null;
-        double maxGain = -1.0;
+        double maxGain = Double.NEGATIVE_INFINITY;
         for (Attribute attribute : dataset.getAttributes()) {
+            if (attribute.equals(classAttribute)) {
+                continue;
+            }
             double gain = this.informationGain(attribute, node.indices);
+            System.out.println("gain for " + attribute + " = " + gain);
             if (gain > maxGain) {
                 select = attribute;
             }
         }
-
+        System.out.println(node.indices);
+        System.out.println(select);
         return select;
     }
 
@@ -99,7 +115,7 @@ public class DecisionTree {
         List<Integer> trainset = this.getTrainset();
 
         // create root Node
-        this.root = new Node(trainset);
+        this.root = new Node(trainset, null);
 
         this.train_recursive(this.root);
     }
@@ -116,12 +132,12 @@ public class DecisionTree {
 
         // create edges for each value of the attribute
         NominalAttribute attr = (NominalAttribute)n.attribute;
-        for (int i = 0; i<attr.getNumberOfValues(); i++) {
+        for (int i = 0; i < attr.getNumberOfValues(); i++) {
             Value v = attr.getValue(i);
             Edge edge = new Edge(v, n);
 
             List<Integer> childIndices = new ArrayList<>();
-            Node child = new Node(childIndices);
+            Node child = new Node(childIndices, n);
 
             edge.end = child;
         }
@@ -149,8 +165,9 @@ public class DecisionTree {
     private boolean isSingleNode(Node node) {
 
         if (node.indices.size() == 0) {
-            //TODO default value
-            return false;
+            node.value = mostCommonValue(node.parent, this.classAttribute);
+            node.isSingleNode = true;
+            return true;
         }
 
         Value value = data[node.indices.get(0)].getValue(classAttribute);
@@ -165,6 +182,31 @@ public class DecisionTree {
         node.isSingleNode = true;
         node.value = value;
         return true;
+    }
+
+    private Value mostCommonValue(Node node, Attribute attribute) {
+        Map<Value, Integer> numValues = new HashMap<Value, Integer>();
+        Value max = null;
+        int maxInt = -1;
+
+        for (Integer i : node.indices) {
+            Instance instance = data[i];
+            Value value = instance.getValue(attribute);
+            Integer integer = 1;
+            if(numValues.containsKey(value)) {
+                integer = numValues.get(value);
+                integer++;
+                numValues.replace(value, integer);
+            } else {
+                numValues.put(value, integer);
+            }
+
+            if (integer > maxInt) {
+                max = value;
+            }
+        }
+
+        return max;
     }
 
     /**
@@ -379,6 +421,10 @@ public class DecisionTree {
         this.train();
     }
 
+    private void printTree() {
+        //root.print("");
+    }
+
     /**
      * a test
      * @param args none
@@ -386,5 +432,6 @@ public class DecisionTree {
     public static void main(String[] args) {
         DecisionTree dt = new DecisionTree("res/weather.nominal.arff");
         dt.testPrint();
+        dt.printTree();
     }
 }
