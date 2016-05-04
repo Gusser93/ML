@@ -120,9 +120,9 @@ public class DecisionTree {
             double gain = this.informationGain(attribute, node.indices);
             if (gain > maxGain) {
                 select = attribute;
+                maxGain = gain;
             }
         }
-        System.out.println(select);
         return select;
     }
 
