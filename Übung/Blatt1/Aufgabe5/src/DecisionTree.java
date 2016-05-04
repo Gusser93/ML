@@ -99,6 +99,12 @@ public class DecisionTree {
     }
 
 
+
+
+    //--------------------------------------------------------------------------
+    //-------------------------Train tree---------------------------------------
+    //--------------------------------------------------------------------------
+
     /**
      *
      * @param node
@@ -112,7 +118,6 @@ public class DecisionTree {
                 continue;
             }
             double gain = this.informationGain(attribute, node.indices);
-            System.out.println("gain for " + attribute + " = " + gain);
             if (gain > maxGain) {
                 select = attribute;
             }
@@ -121,15 +126,20 @@ public class DecisionTree {
         return select;
     }
 
-    public void train() {
-        List<Integer> trainset = this.getTrainset();
 
+    /**
+     *
+     */
+    public void train(List<Integer> trainset) {
         // create root Node
         this.root = new Node(trainset, null);
-
         this.train_recursive(this.root);
     }
 
+    /**
+     * Internal method
+     * @param n
+     */
     public void train_recursive(Node n) {
         // todo remove attributes to prevet duplicates
 
@@ -145,22 +155,25 @@ public class DecisionTree {
         for (int i = 0; i < attr.getNumberOfValues(); i++) {
             Value v = attr.getValue(i);
             Edge edge = new Edge(v, n);
-
-            List<Integer> childIndices = new ArrayList<>();
-            Node child = new Node(childIndices, n);
-
-            edge.end = child;
+            edge.end = new Node(new ArrayList<>(), n);
         }
+
 
 
         for (Integer idx : n.indices) {
             Instance i = this.data[idx];
             Value v = i.getValue(n.attribute);
+            //System.out.println(v);
+            //System.out.println(idx);
+
+
 
             // add index to right edge
             for (Edge edge : n.edges) {
                 if (edge.value.equals(v)) {
+                    //System.out.println(idx);
                     edge.end.indices.add(idx);
+                    break;
                 }
             }
 
@@ -172,6 +185,11 @@ public class DecisionTree {
         }
     }
 
+    /**
+     *
+     * @param node
+     * @return
+     */
     private boolean isSingleNode(Node node) {
 
         if (node.indices.size() == 0) {
@@ -193,6 +211,50 @@ public class DecisionTree {
         node.value = value;
         return true;
     }
+
+
+    //--------------------------------------------------------------------------
+    //-------------------------classify tree------------------------------------
+    //--------------------------------------------------------------------------
+
+
+    public double classify(List<Integer> data) {
+        int correctlyClassified = 0;
+        // repeat for each instance
+        for (Integer i : data) {
+            Instance instance = this.data[i];
+
+            // iterate over tre
+            Node currentNode = this.root;
+            while (!currentNode.isSingleNode) {
+                Attribute attr = currentNode.attribute;
+                Value value = instance.getValue(attr);
+
+                // find right edge
+                for (Edge edge : currentNode.edges) {
+                    if (edge.value.equals(value)) {
+                        currentNode = edge.end;
+                        break;
+                    }
+                }
+            }
+
+            // check if class attr is correct
+            if ( currentNode.getValue().equals(instance.getValue(classAttribute)) ) {
+                correctlyClassified ++;
+            }
+
+        }
+
+        return (double)correctlyClassified/(double)data.size();
+    }
+
+
+
+
+    //--------------------------------------------------------------------------
+    //-------------------------Constructor--------------------------------------
+    //--------------------------------------------------------------------------
 
     private Value mostCommonValue(Node node, Attribute attribute) {
         Map<Value, Integer> numValues = new HashMap<Value, Integer>();
@@ -383,6 +445,12 @@ public class DecisionTree {
     }
 
 
+
+    //--------------------------------------------------------------------------
+    //-------------------------Train and Testset--------------------------------
+    //--------------------------------------------------------------------------
+
+
     /**
      * @return 2/3 trainset
      */
@@ -393,22 +461,35 @@ public class DecisionTree {
             indices.add(i);
         }
 
-        // get 2/3 of the data
-        List<Integer> trainIndices = new ArrayList<Integer>();
-
         // get random indices
         int size = indices.size() * 2/3;
-        while (trainIndices.size() < size) {
-            // add random element to trainIndices
+        while (indices.size() >= size) {
             Random random = new Random();
             Integer randomIdx = random.nextInt(indices.size());
-            trainIndices.add(indices.get(randomIdx));
-            // remove Element from all indices
             indices.remove(randomIdx);
         }
 
-        return trainIndices;
+
+        return indices;
     }
+
+
+    public List<Integer> getInverseSet(List<Integer> originalSet) {
+        List<Integer> inverseSet = new ArrayList<>();
+        for (int i=0; i<this.data.length; i++) {
+            if (!originalSet.contains(i))
+                inverseSet.add(i);
+        }
+        return inverseSet;
+    }
+
+
+
+
+
+    //--------------------------------------------------------------------------
+    //-------------------------test---------------------------------------------
+    //--------------------------------------------------------------------------
 
 
 
@@ -428,7 +509,12 @@ public class DecisionTree {
             System.out.println();
         }*/
 
-        this.train();
+        List<Integer> trainset = this.getTrainset();
+        System.out.println(Arrays.toString(trainset.toArray()));
+
+
+        this.train(trainset);
+        System.out.println(this.classify(this.getInverseSet(trainset)));
     }
 
     private void printTree() {
