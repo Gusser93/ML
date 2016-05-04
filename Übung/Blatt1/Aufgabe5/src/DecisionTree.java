@@ -106,39 +106,36 @@ public class DecisionTree {
 
     public void train_recursive(Node n) {
         // todo remove attributes to prevet duplicates
-        // todo add leafs
 
-
+        // exit function
         if (this.isSingleNode(n)) {
             return;
         }
         //select attribute with biggest informationGain
         n.attribute = this.selectAttribute(n);
 
+        // create edges for each value of the attribute
+        NominalAttribute attr = (NominalAttribute)n.attribute;
+        for (int i = 0; i<attr.getNumberOfValues(); i++) {
+            Value v = attr.getValue(i);
+            Edge edge = new Edge(v, n);
+
+            List<Integer> childIndices = new ArrayList<>();
+            Node child = new Node(childIndices);
+
+            edge.end = child;
+        }
 
 
         for (Integer idx : n.indices) {
             Instance i = this.data[idx];
             Value v = i.getValue(n.attribute);
 
-            // check if node has an edge with given value
-            Edge edge = null;
-            for (Edge e : n.edges) {
-                if (e.value.equals(v)) {
-                    edge = e;
+            // add index to right edge
+            for (Edge edge : n.edges) {
+                if (edge.value.equals(v)) {
+                    edge.end.indices.add(idx);
                 }
-            }
-
-            // create edge and add index to child node
-            if (edge == null) {
-                List<Integer> childIndices = new ArrayList<>();
-                childIndices.add(idx);
-                Node child = new Node(childIndices);
-
-                edge = new Edge(v, n);
-                edge.end = child;
-            } else {
-                edge.end.indices.add(idx);
             }
 
         }
