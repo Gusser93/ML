@@ -77,6 +77,12 @@ public class DecisionTree {
     }
 
 
+
+
+    //--------------------------------------------------------------------------
+    //-------------------------Train tree---------------------------------------
+    //--------------------------------------------------------------------------
+
     /**
      *
      * @param node
@@ -95,15 +101,20 @@ public class DecisionTree {
         return select;
     }
 
-    public void train() {
-        List<Integer> trainset = this.getTrainset();
 
+    /**
+     *
+     */
+    public void train(List<Integer> trainset) {
         // create root Node
         this.root = new Node(trainset);
-
         this.train_recursive(this.root);
     }
 
+    /**
+     * Internal method
+     * @param n
+     */
     public void train_recursive(Node n) {
         // todo remove attributes to prevet duplicates
 
@@ -135,6 +146,7 @@ public class DecisionTree {
             for (Edge edge : n.edges) {
                 if (edge.value.equals(v)) {
                     edge.end.indices.add(idx);
+                    break;
                 }
             }
 
@@ -146,6 +158,11 @@ public class DecisionTree {
         }
     }
 
+    /**
+     *
+     * @param node
+     * @return
+     */
     private boolean isSingleNode(Node node) {
 
         if (node.indices.size() == 0) {
@@ -166,6 +183,50 @@ public class DecisionTree {
         node.value = value;
         return true;
     }
+
+
+    //--------------------------------------------------------------------------
+    //-------------------------classify tree------------------------------------
+    //--------------------------------------------------------------------------
+
+
+    public double classify(List<Integer> data) {
+        int correctlyClassified = 0;
+        // repeat for each instance
+        for (Integer i : data) {
+            Instance instance = this.data[i];
+
+            // iterate over tre
+            Node currentNode = this.root;
+            while (!currentNode.isSingleNode) {
+                Attribute attr = currentNode.attribute;
+                Value value = instance.getValue(attr);
+
+                // find right edge
+                for (Edge edge : currentNode.edges) {
+                    if (edge.value.equals(value)) {
+                        currentNode = edge.end;
+                        break;
+                    }
+                }
+            }
+
+            // check if class attr is correct
+            if ( currentNode.getValue().equals(instance.getValue(classAttribute)) ) {
+                correctlyClassified ++;
+            }
+
+        }
+
+        return (double)correctlyClassified/(double)data.size();
+    }
+
+
+
+
+    //--------------------------------------------------------------------------
+    //-------------------------Constructor--------------------------------------
+    //--------------------------------------------------------------------------
 
     /**
      * loads arff
@@ -331,6 +392,12 @@ public class DecisionTree {
     }
 
 
+
+    //--------------------------------------------------------------------------
+    //-------------------------Train and Testset--------------------------------
+    //--------------------------------------------------------------------------
+
+
     /**
      * @return 2/3 trainset
      */
@@ -359,6 +426,24 @@ public class DecisionTree {
     }
 
 
+    public List<Integer> getInverseSet(List<Integer> originalSet) {
+        List<Integer> inverseSet = new ArrayList<>();
+        for (int i=0; i<this.data.length; i++) {
+            if (!originalSet.contains(i))
+                inverseSet.add(i);
+        }
+        return inverseSet;
+    }
+
+
+
+
+
+    //--------------------------------------------------------------------------
+    //-------------------------test---------------------------------------------
+    //--------------------------------------------------------------------------
+
+
 
     /**
      * prints some test data
@@ -376,7 +461,9 @@ public class DecisionTree {
             System.out.println();
         }*/
 
-        this.train();
+        List<Integer> trainset = this.getTrainset();
+        this.train(trainset);
+        System.out.println(this.classify(this.getInverseSet(trainset)));
     }
 
     /**
