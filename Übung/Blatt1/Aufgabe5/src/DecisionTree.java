@@ -7,7 +7,7 @@ import java.util.Random;
 
 //TODO exceptions
 /**
- * Created by Markus Vieth on 21.04.2016.
+ * Created by David Klopp, Christian Stricker, Markus Vieth on 21.04.2016.
  */
 public class DecisionTree {
 
@@ -54,8 +54,7 @@ public class DecisionTree {
 
 
 
-    private List<Node> nodes = new ArrayList<>();
-    private List<Edge> edges = new ArrayList<>();
+    private Node root = null;
 
     private Instance[] data;
     private Dataset dataset;
@@ -89,18 +88,18 @@ public class DecisionTree {
     public void train() {
         List<Integer> trainset = this.getTrainset();
 
-        // create Node with attribute with biggest informationGain
-        Node n = new Node(trainset);
+        // create root Node
+        this.root = new Node(trainset);
 
-        this.train_recursive(n);
+        this.train_recursive(this.root);
     }
 
     public void train_recursive(Node n) {
         // todo remove attributes to prevet duplicates
         // todo add leafs
 
+        //select attribute with biggest informationGain
         n.attribute = this.selectAttribute(n);
-        this.nodes.add(n);
 
         for (Integer idx : n.indices) {
             Instance i = this.data[idx];
@@ -120,17 +119,17 @@ public class DecisionTree {
                 childIndices.add(idx);
                 Node child = new Node(childIndices);
 
-                edge = new Edge(v, child);
-                this.edges.add(edge);
+                edge = new Edge(v, n);
+                edge.end = child;
             } else {
-                edge.start.indices.add(idx);
+                edge.end.indices.add(idx);
             }
 
         }
 
         // create tree
         for (Edge e : n.edges) {
-            this.train_recursive(e.start);
+            this.train_recursive(e.end);
         }
     }
 
@@ -333,7 +332,6 @@ public class DecisionTree {
         for (int i = 0; i < data.length; i++) {
             indices.add(i);
         }
-        System.out.println(indices);
 
         /*for (Attribute attr : this.dataset.getAttributes()) {
             System.out.print("Attribute " + attr.getName());
@@ -342,7 +340,7 @@ public class DecisionTree {
             System.out.println();
         }*/
 
-        System.out.println(this.getTrainset());
+        this.train();
     }
 
     /**
