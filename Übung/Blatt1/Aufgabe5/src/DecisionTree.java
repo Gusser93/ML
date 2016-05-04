@@ -108,7 +108,7 @@ public class DecisionTree {
             // check if node has an edge with given value
             Edge edge = null;
             for (Edge e : n.edges) {
-                if (e.value == v) {
+                if (e.value.equals(v)) {
                     edge = e;
                 }
             }
