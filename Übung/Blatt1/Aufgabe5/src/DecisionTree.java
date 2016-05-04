@@ -508,8 +508,8 @@ public class DecisionTree {
         }*/
 
         List<Integer> trainset = this.getTrainset();
-
         this.train(trainset);
+        System.out.println(this.classify(this.getInverseSet(trainset)));
     }
 
     private void printTree() {
