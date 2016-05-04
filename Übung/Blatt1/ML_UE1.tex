@@ -11,6 +11,7 @@
 \input{../head/lstlisting.tex}
 \begin{document}
 
+\newcommand{\cor}[1]{\textcolor{red}{\textit{#1}}}
 \maketitle
 \cleardoublepage
 \pagestyle{myheadings}
@@ -46,15 +47,14 @@ $~$\\
 $~$\\
 $~$\\
 \subsection*{b)}
-\begin{wrapfigure}[5]{l}{0.5\textwidth}
+\begin{wrapfigure}[7]{l}{0.5\textwidth}
 	\begin{center}
 		
 		\vspace*{-3em}
 \includegraphics[width=\linewidth]{Aufgabe1/graphB.eps}
 \end{center}
 \end{wrapfigure}
-Skizze des M-von-N-Baumes. Die Teilbäume der Knoten M bis N und N-M bis N finden sich (teilweise verkürzt) in der Mitte des Baumes wieder. Der Baum hat eine maximale Tiefe von N und eine maximale Breite von $2^{M+1}$ im Level $M+1$
-
+Skizze des M-von-N-Baumes. Die Teilbäume der Knoten M bis N und N-M bis N finden sich (teilweise verkürzt) in der Mitte des Baumes wieder. Der Baum hat eine maximale Tiefe von N und eine maximale Breite von $2^{M+1}$ im Level $M+1$ \cor{Leichter ist es den Baum formal zu beschreiben (wie ein Programm). So bleibt einiges offen. -0,5}
 \newpage
 
 \section*{Nr.3}
@@ -80,7 +80,7 @@ Entropie ist eine Skala für die Verteilung der Werte des Klassenattributes auf 
 \end{tabular}
 
 \subsection*{d)}
-Bei einem Entscheidungsbaum ist die Reihenfolge der Betrachtung der Attribute für dessen Komplexität von Bedeutung. Die Qualität eines Attributes kann mithilfe des InformationGains bewertet werden. Dazu betrachten wir die erwartete Verminderung der aktuellen Entropie bei Wahl des betrachteten Attributes. Durch eine niedrige erwartete Entropie wird der Baum kürzer.
+Bei einem Entscheidungsbaum ist die Reihenfolge der Betrachtung der Attribute für dessen Komplexität von Bedeutung. Die Qualität \cor{naja} eines Attributes kann mithilfe des InformationGains bewertet werden. Dazu betrachten wir die erwartete Verminderung der aktuellen Entropie bei Wahl des betrachteten Attributes. Durch eine niedrige erwartete Entropie wird der Baum kürzer. \cor{Wie wird das gemacht? -1,5}
 
 
 \section*{Nr.5}
