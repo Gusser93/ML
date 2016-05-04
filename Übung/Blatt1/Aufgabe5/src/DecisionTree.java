@@ -118,11 +118,14 @@ public class DecisionTree {
                 continue;
             }
             double gain = this.informationGain(attribute, node.indices);
+            System.out.println("Gain for " + attribute + " = " + gain);
             if (gain > maxGain) {
+                maxGain = gain;
                 select = attribute;
             }
         }
         System.out.println(select);
+        System.out.println();
         return select;
     }
 
@@ -508,8 +511,8 @@ public class DecisionTree {
         }*/
 
         List<Integer> trainset = this.getTrainset();
-        this.train(trainset);
-        System.out.println(this.classify(this.getInverseSet(trainset)));
+        this.train(indices);
+        System.out.println(this.classify(this.getInverseSet(indices)));
     }
 
     private void printTree() {
@@ -522,7 +525,9 @@ public class DecisionTree {
      */
     public static void main(String[] args) {
         DecisionTree dt = new DecisionTree("res/weather.nominal.arff");
+        System.out.println("##################\n###TEST PRINT###\n###########");
         dt.testPrint();
+        System.out.println("##################\n###BAUMBART###\n#############");
         dt.printTree();
     }
 }
