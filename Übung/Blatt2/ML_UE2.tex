@@ -43,21 +43,21 @@
 		\caption{Abbildung 3: 500 Lerner}
 	\end{subfigure}
 	
-	\caption{Plots bei verschieden vielen Lernern}
+	\caption*{Plots bei verschieden vielen Lernern}
 \end{figure*}
 
 \subsection*{Aufgabe}
 AdaBoost nutzt mehrere weak learner (in diesem Beispiel Bäume der Tiefe 1), um zusammen einen strong learner zu bilden. In Abbildung 1 ist zu sehen, dass die Decision Borders bei einem learner aus einer geraden Linie besteht, welche die Instanzen in 2 Gruppen aufteilt. Im Histogramm ist zu sehen, dass dies zwar dazu führt, dass mehr als die Hälfte der Instanzen richtig klassifiziert werden, aber auch, dass die Fehlerquote sehr hoch ist. Bei 2 Lernern, wie in Abbildung 2 können mehr Instanzen richtig klassifiziert werden. Mit hunderten, wie in Abbildung 3, werden die Decision Borders komplexer und die Klassifizierung noch genauer. Im Histogramm wird deutlich, dass die "`Sicherheit"' (Score) der Aussagen mit zunehmender Anzahl an Lernern, abnimmt.
 
 \section*{Nr.3}
-0.632 Bootstrap meint die Bootstrap-Evaluierung mit einem Testset der Größe n, wobei n die Größe des genutzten Datensatzes ist. Für das Bootstrapverfahren werden zufällig gleichverteilt Instanzen aus dem Datensatz dem Trainingssatz hinzugefügt, bis dieses voll ist. Dabei wird in jeder Iteration der komplette Datensatz betrachtet, inklusive der bereits gewählten Instanzen. Die nicht gewählten Instanzen bilden den Testsatz.
+0.632 Bootstrap meint die Bootstrap-Evaluierung mit einem Testset der Größe n, wobei n die Größe des genutzten Datensatzes ist. Für das Bootstrapverfahren werden zufällig gleichverteilt Instanzen aus dem Datensatz dem Trainingssatz hinzugefügt, bis dieser voll ist. Dabei wird in jeder Iteration der komplette Datensatz betrachtet, inklusive der bereits gewählten Instanzen. Die nicht gewählten Instanzen bilden den Testsatz.
 Die Wahrscheinlichkeit, dass eine Instanz in einer Iteration nicht gewählt wird beträgt
 \[ 1 - \frac{1}{n}  \]
-Die prozentuale Größe des Testsatzes somit beträgt
+Die prozentuale Größe des Testsatzes beträgt somit
 \[ (1 - \frac{1}{n})^m \]
-wobei $n$ die Größe des Datensatzes und $m$ die Größe des Trainingssatzes sind. Für $n = m$ gilt:
+wobei $n$ die Größe des Datensatzes und $m$ die Größe des Trainingssatzes ist. Für $n = m$ gilt:
 \[ 1 - (1 - \frac{1}{n})^n \approx 1 - \frac{1}{e} \approx 0,632 \]
-Für einen Testsatz der Größe $2n$  gilt somit:
+Für einen Testsatz der Größe $2n$  folgt somit:
 \[ 1 - (1 - \frac{1}{n})^2n = 1 - \left((1 - \frac{1}{n})^n\right)^2  \approx 1 - \frac{1}{e^2} \approx 0,865 \]
 
 \end{document}
