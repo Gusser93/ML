@@ -283,7 +283,7 @@ public class DecisionTree {
         }
         return select;
     }
-    
+
     /**
      * Tests if node has only one class left and sets node.isSingleNode
      * @param node
