@@ -20,7 +20,11 @@
 
 \section*{Nr.1}
 \subsection*{Code}
-\lstinputlisting[language = java]{Aufgabe1/src/DecisionTree.java}
+\lstinputlisting[language = java, firstline = 1, lastline = 202]{../Code/src/DecisionTree.java}
+\[ \vdots \]
+\lstinputlisting[language = java, firstline = 258, lastline = 362, firstnumber = 258]{../Code/src/DecisionTree.java}
+\[ \vdots \]
+\lstinputlisting[language = java, firstline = 474, lastline = 555, firstnumber = 474]{../Code/src/DecisionTree.java}
 
 \newpage
 
@@ -50,7 +54,7 @@ AdaBoost nutzt mehrere weak learner (in diesem Beispiel Bäume der Tiefe 1), um 
 \section*{Nr.3}
 0.632 Bootstrap meint die Bootstrap-Evaluierung mit einem Testset der Größe n, wobei n die Größe des genutzten Datensatzes ist. Für das Bootstrapverfahren werden zufällig gleichverteilt Instanzen aus dem Datensatz dem Trainingssatz hinzugefügt, bis dieser voll ist. Dabei wird in jeder Iteration der komplette Datensatz betrachtet, inklusive der bereits gewählten Instanzen. Die nicht gewählten Instanzen bilden den Testsatz.
 Die Wahrscheinlichkeit, dass eine Instanz in einer Iteration nicht gewählt wird beträgt
-\[ 1 - \frac{1}{n}  \]
+$ 1 - \frac{1}{n}$
 Die prozentuale Größe des Testsatzes beträgt somit
 \[ (1 - \frac{1}{n})^m \]
 wobei $n$ die Größe des Datensatzes und $m$ die Größe des Trainingssatzes ist. Für $n = m$ gilt:
