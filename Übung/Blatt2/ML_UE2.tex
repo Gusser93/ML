@@ -20,12 +20,15 @@
 
 \section*{Nr.1}
 \subsection*{Code}
-\lstinputlisting[language = java]{Aufgabe1/src/DecisionTree.java}
+\lstinputlisting[language = java, firstline = 1, lastline = 202]{../Code/src/DecisionTree.java}
+\[ \vdots \]
+\lstinputlisting[language = java, firstline = 258, lastline = 362, firstnumber = 258]{../Code/src/DecisionTree.java}
+\[ \vdots \]
+\lstinputlisting[language = java, firstline = 474, lastline = 555, firstnumber = 474]{../Code/src/DecisionTree.java}
 
 \newpage
 
 \section*{Nr.2}
-\subsection*{Anmerkung}
 \begin{figure*}[t!]
 	\centering
 	\begin{subfigure}[t]{0.33\textwidth}
@@ -34,8 +37,8 @@
 	\end{subfigure}%
 	~
 	\begin{subfigure}[t]{0.33\textwidth}
-		\includegraphics[width=\textwidth]{images/2.png}
-		\caption{Abbildung 2: 2 Lerner}
+		\includegraphics[width=\textwidth]{images/10.png}
+		\caption{Abbildung 2: 10 Lerner}
 	\end{subfigure}%
 	~
 	\begin{subfigure}[t]{0.33\textwidth}
@@ -46,13 +49,12 @@
 	\caption*{Plots bei verschieden vielen Lernern}
 \end{figure*}
 
-\subsection*{Aufgabe}
-AdaBoost nutzt mehrere weak learner (in diesem Beispiel Bäume der Tiefe 1), um zusammen einen strong learner zu bilden. In Abbildung 1 ist zu sehen, dass die Decision Borders bei einem learner aus einer geraden Linie besteht, welche die Instanzen in 2 Gruppen aufteilt. Im Histogramm ist zu sehen, dass dies zwar dazu führt, dass mehr als die Hälfte der Instanzen richtig klassifiziert werden, aber auch, dass die Fehlerquote sehr hoch ist. Bei 2 Lernern, wie in Abbildung 2 können mehr Instanzen richtig klassifiziert werden. Mit hunderten, wie in Abbildung 3, werden die Decision Borders komplexer und die Klassifizierung noch genauer. Im Histogramm wird deutlich, dass die "`Sicherheit"' (Score) der Aussagen mit zunehmender Anzahl an Lernern, abnimmt.
+AdaBoost nutzt mehrere weak learner (in diesem Beispiel Bäume der Tiefe 1), um zusammen einen strong learner zu bilden. In Abbildung 1 ist zu sehen, dass die Decision Boundary bei einem learner aus einer geraden Linie besteht, welche die Instanzen in 2 Gruppen aufteilt. Im Histogramm ist zu sehen, dass dies zwar dazu führt, dass mehr als die Hälfte der Instanzen richtig klassifiziert werden, aber auch, dass die Fehlerquote sehr hoch ist. Bei 10 Lernern, wie in Abbildung 2 können mehr Instanzen richtig klassifiziert werden, weil der strong learner durch die vielen weak lerner den Merkmalsraum in mehr "`Bereiche"' einteilt, welche im Decision Boundary Diagramm gut zu sehen sind. Diese Bereiche entstehen, weil die hier genutzten weak learner den Merkmalsraum in je 2 Hälften an unterschiedlichen Stellen unterteilen. Im strong learner werden nun, bildlich gesprochen, die weak learner übereinander gelegt. Dabei kommt es zu Überscheidungen von unterschiedlich "`eingefärbten"' Bereichen. Diese bekommen im strong learner jene Klasse zugeteilt, welche in dem betrachteten Bereich mit dem größten Gewicht in den schwachen Lernern vorkommt. Mit ein ausreichend großen Zahl an schwachen Lernern, z.B. 500 wie in Abbildung 3, werden die Decision Boundary komplexer und die Klassifizierung noch genauer. Im Histogramm wird deutlich, dass die "`Sicherheit"' der Aussagen, der Score, mit steigender Anzahl an schwachen Lernern abnimmt, jedoch der strong learner weniger Fehler macht, zum Vergleich, der "`strong learner"' aus einem weak learner klassifizierte etwas über 200 von 500 Instanzen falsch (laut Histogramm aus Abbildung 1), während der strong learner aus Abbildung 3 nur noch etwa 70 Instanzen falsch zuordnet.
 
 \section*{Nr.3}
 0.632 Bootstrap meint die Bootstrap-Evaluierung mit einem Testset der Größe n, wobei n die Größe des genutzten Datensatzes ist. Für das Bootstrapverfahren werden zufällig gleichverteilt Instanzen aus dem Datensatz dem Trainingssatz hinzugefügt, bis dieser voll ist. Dabei wird in jeder Iteration der komplette Datensatz betrachtet, inklusive der bereits gewählten Instanzen. Die nicht gewählten Instanzen bilden den Testsatz.
 Die Wahrscheinlichkeit, dass eine Instanz in einer Iteration nicht gewählt wird beträgt
-\[ 1 - \frac{1}{n}  \]
+$ 1 - \frac{1}{n}$
 Die prozentuale Größe des Testsatzes beträgt somit
 \[ (1 - \frac{1}{n})^m \]
 wobei $n$ die Größe des Datensatzes und $m$ die Größe des Trainingssatzes ist. Für $n = m$ gilt:

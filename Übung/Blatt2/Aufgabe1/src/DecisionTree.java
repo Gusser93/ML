@@ -30,21 +30,34 @@ public class DecisionTree {
             this.parent = parent;
             if (parent == null) {
                 notVisited = dataset.getAttributes();
+                notVisited.remove(classAttribute);
             } else {
                 notVisited = parent.notVisited;
             }
         }
 
+        /**
+         * adds edge
+         * @param edge
+         */
         public void addEdge(Edge edge) {
             this.edges.add(edge);
         }
 
+        /**
+         * get value if single node else null
+         * @return
+         */
         public Value getValue() {
             if (isSingleNode)
                 return value;
             return null;
         }
 
+        /**
+         * prints tree recursive (still needs some work)
+         * @param prefix
+         */
         public void print(String prefix) {
             if (isSingleNode) {
                 System.out.println(prefix + " " + value);
@@ -56,12 +69,15 @@ public class DecisionTree {
             }
         }
 
+        /**
+         * sets attribute and removes from not visited
+         * @param attribute
+         */
         public void setAttribute(Attribute attribute) {
             this.attribute = attribute;
             this.notVisited.remove(attribute);
         }
     }
-
 
     /**
      * Edge class
@@ -82,9 +98,6 @@ public class DecisionTree {
         }
     }
 
-
-
-
     private Node root = null;
 
     private Instance[] data;
@@ -95,28 +108,28 @@ public class DecisionTree {
      * default constructor
      */
     public DecisionTree() {
-        
     }
-
-
-
 
     //--------------------------------------------------------------------------
     //-------------------------Train tree---------------------------------------
     //--------------------------------------------------------------------------
 
     /**
-     *
+     * chooses the attribute with the best information gain
      * @param node
      * @return
      */
     public Attribute selectAttribute(Node node) {
         Attribute select = null;
         double maxGain = Double.NEGATIVE_INFINITY;
+
+        // looks at all relevant attributes
         for (Attribute attribute : node.notVisited) {
-            if (attribute.equals(classAttribute)) {
+
+            // does not look at classAttribute
+            /*if (attribute.equals(classAttribute)) {
                 continue;
-            }
+            }*/
             double gain = this.informationGain(attribute, node.indices);
             if (gain > maxGain) {
                 select = attribute;
@@ -125,7 +138,6 @@ public class DecisionTree {
         }
         return select;
     }
-
 
     /**
      *
@@ -141,7 +153,6 @@ public class DecisionTree {
      * @param n
      */
     public void train_recursive(Node n) {
-        // todo remove attributes to prevet duplicates
 
         // exit function
         if (this.isSingleNode(n)) {
@@ -164,8 +175,6 @@ public class DecisionTree {
             Instance i = this.data[idx];
             Value v = i.getValue(n.attribute);
 
-
-
             // add index to right edge
             for (Edge edge : n.edges) {
                 if (edge.value.equals(v)) {
@@ -173,9 +182,7 @@ public class DecisionTree {
                     break;
                 }
             }
-
         }
-
         // create tree
         for (Edge e : n.edges) {
             this.train_recursive(e.end);
@@ -183,21 +190,40 @@ public class DecisionTree {
     }
 
     /**
-     *
+     * Tests if node has only one class left and sets node.isSingleNode
      * @param node
      * @return
      */
     private boolean isSingleNode(Node node) {
 
-        if (node.indices.size() == 0 || node.notVisited.size() == 0 || (node
-                .notVisited.size() == 1 && node.notVisited.contains(classAttribute))) {
+        // if node is empty we set his value to the most common
+        // value of his parent
+        if (node.indices.size() == 0) {
             node.value = mostCommonValue(node.parent, this.classAttribute);
+            node.isSingleNode = true;
+            return true;
+        }
+
+        // should not be possible anymore
+        // if last node we set value to most common value
+        /*if ( node.notVisited.size() == 1
+                && node.notVisited.contains(classAttribute)) {
+            node.value = mostCommonValue(node, this.classAttribute);
+            node.isSingleNode = true;
+            return true;
+        }*/
+
+        /*// should not be possible, else like the one over this*/
+        // if last node we set value to most common value
+        if ( node.notVisited.size() == 0 ) {
+            node.value = mostCommonValue(node, this.classAttribute);
             node.isSingleNode = true;
             return true;
         }
 
         Value value = data[node.indices.get(0)].getValue(classAttribute);
 
+        // if one instance has an other value as the rest return false
         for (int i = 1; i < node.indices.size(); i++) {
             Instance instance = data[node.indices.get(i)];
             if (! instance.getValue(classAttribute).equals(value)) {
@@ -205,6 +231,7 @@ public class DecisionTree {
             }
         }
 
+        // else set as single node and return true
         node.isSingleNode = true;
         node.value = value;
         return true;
@@ -216,7 +243,13 @@ public class DecisionTree {
     //--------------------------------------------------------------------------
 
 
+    /**
+     * classifies given data set on decision Tree
+     * @param data
+     * @return
+     */
     public double classify(List<Integer> data) {
+        //TODO test if tree is build
         int correctlyClassified = 0;
         // repeat for each instance
         for (Integer i : data) {
@@ -254,8 +287,16 @@ public class DecisionTree {
     //-------------------------Constructor--------------------------------------
     //--------------------------------------------------------------------------
 
+    /**
+     * returns most common value from node in attribute
+     * @param node
+     * @param attribute
+     * @return
+     */
     private Value mostCommonValue(Node node, Attribute attribute) {
+        // because attribute dose not know his values
         Map<Value, Integer> numValues = new HashMap<Value, Integer>();
+        // temp
         Value max = null;
         int maxInt = -1;
 
@@ -399,10 +440,12 @@ public class DecisionTree {
         // calculates number of instances with value v in class attribute
         for (int v = 0; v < classAttr.getNumberOfValues(); v++) {
             values[v] = 0;
+            NominalValue classValue = classAttr.getValue(v);
+
+            // counts number of value v in trainset
             for(int i : indices) {
                 Instance instance = data[i];
                 NominalValue value = (NominalValue)instance.getValue(classAttr);
-                NominalValue classValue = classAttr.getValue(v);
                 if (classValue.equals(value)) {
                     values[v]++;
                 }
@@ -453,14 +496,24 @@ public class DecisionTree {
      * @return 2/3 trainset
      */
     public List<Integer> getTrainset() {
+        return getTrainset(2.0/3);
+    }
+
+    /**
+     * splits data set in train set
+     * @param split size og train set as percentage
+     * @return trainset
+     */
+    public List<Integer> getTrainset(double split) {
         // get List with all indices
         List<Integer> indices = new ArrayList<>();
         for (int i = 0; i < this.data.length; i++) {
             indices.add(i);
         }
 
+        //TODO check split, throw Exception
         // get random indices
-        int size = indices.size() * 2/3;
+        int size = (int)Math.ceil(indices.size() * split);
         while (indices.size() >= size) {
             Random random = new Random();
             Integer randomIdx = random.nextInt(indices.size());
@@ -472,6 +525,11 @@ public class DecisionTree {
     }
 
 
+    /**
+     * returns inverse data set
+     * @param originalSet
+     * @return
+     */
     public List<Integer> getInverseSet(List<Integer> originalSet) {
         List<Integer> inverseSet = new ArrayList<>();
         for (int i=0; i<this.data.length; i++) {
@@ -513,6 +571,7 @@ public class DecisionTree {
     }
 
     private void printTree() {
+        System.out.println("Tree");
         root.print("");
     }
 
