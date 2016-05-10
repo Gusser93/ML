@@ -539,6 +539,19 @@ public class DecisionTree {
         return inverseSet;
     }
 
+    public List<Integer> getBootstrapTrainset(int n) {
+        List<Integer> result = new ArrayList<>();
+        Random random = new Random();
+        for (int i = 0; i < n; i++) {
+            result.add(random.nextInt(dataset.getNumberOfInstances()));
+        }
+        return result;
+    }
+
+    public List<Integer> getBootstrapTrainset() {
+        return this.getBootstrapTrainset(this.dataset.getNumberOfInstances());
+    }
+
 
 
 
