@@ -136,7 +136,6 @@ public class Tests {
     private static void testRandomForest(int n, File data, Instances
             instances) throws Exception {
 
-        double performanceWekaRandomForest = 0;
         DecisionTree dT = new DecisionTree(data);
         List<Integer> trainsetIndex = dT.getTrainset();
         List<Integer> testsetIndex = dT.getInverseSet(trainsetIndex);
@@ -148,8 +147,8 @@ public class Tests {
 
             RandomForest randomForest = trainRandomForest(trainS, i);
 
-            performanceWekaRandomForest
-                    += evalWeka(randomForest, testS, trainS);
+            double performanceWekaRandomForest
+                    = evalWeka(randomForest, testS, trainS);
             System.out.println("For " + i + " Trees is the performance: "
                     + performanceWekaRandomForest);
         }
@@ -166,10 +165,10 @@ public class Tests {
             instances.setClassIndex(instances.numAttributes() - 1);
         }
 
-        testRandomForest(1000, data, instances);
+        testRandomForest(100, data, instances);
 
         System.out.println();
 
-        dtVsRf(1000, data, instances);
+        dtVsRf(100, data, instances);
     }
 }
