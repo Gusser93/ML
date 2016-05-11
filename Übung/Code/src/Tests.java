@@ -114,7 +114,7 @@ public class Tests {
 
             RandomForest randomForest = trainRandomForest(trainS, i);
 
-            performanceWekaRandomForest += evalWeka(randomForest, testS, trainS);
+            performanceWekaRandomForest = evalWeka(randomForest, testS, trainS) / i;
             System.out.println("For " + i + " Trees is the performance: " + performanceWekaRandomForest);
         }
 
