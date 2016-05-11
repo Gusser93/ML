@@ -155,7 +155,7 @@ public class Tests {
     }
 
     public static void main(String... args) throws Exception {
-
+System.out.println("MUH");
         File data = new File("res/car.arff");
         ArffLoader source = new ArffLoader();
         source.setFile(data);
