@@ -99,6 +99,26 @@ public class Tests {
         }
 
         double result = 0;
+        double performanceWekaRandomForest = 0;
+
+
+
+        DecisionTree dT = new DecisionTree(data);
+        List<Integer> trainsetIndex = dT.getTrainset();
+        List<Integer> testsetIndex = dT.getInverseSet(trainsetIndex);
+
+        Instances trainS = getSplitSet(instances, trainsetIndex);
+        Instances testS = getSplitSet(instances, testsetIndex);
+
+        for(int i = 0; i< n; i++) {
+
+            RandomForest randomForest = trainRandomForest(trainS, i);
+
+            performanceWekaRandomForest += evalWeka(randomForest, testS, trainS);
+            System.out.println("For " + i + " Trees is the performance: " + performanceWekaRandomForest);
+        }
+
+        System.out.println();
 
         for (int i = 0; i < n; i++) {
             DecisionTree decisionTree = new DecisionTree(data);
