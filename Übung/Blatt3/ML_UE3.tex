@@ -18,13 +18,13 @@
 \pagestyle{myheadings}
 \markboth{Markus Vieth,  David Klopp, Christian Stricker}{Markus Vieth, David Klopp, Christian Stricker}
 
-\section*{Nr.1}
+\section*{a}
 Bagging erwartet einen Parameter, der angibt wie viele Bäume erzeugt werden sollen. Jeder dieser Bäume betrachtet hierbei alle Attribute. \\
 Bei Random Forest handelt es sich um eine Unterform des Bagging, die bei der Erstellung der Bäume nicht alle Attribute, sondern nur eine Auswahl derer berücksichtigt. Diese m vielen Attribute werden vor der Erstellung eines Baumes zufällig aus der Menge aller Attribute ausgewählt. \\Wenn n die Anzahl aller Attribute ist, so entspricht m bei der Klassifizierung in der Regel $\sqrt n$.\\
 Random Forest erzeugt somit höchstens Teilbäume der Tiefe m, wohingegen beim Bagging die Tiefe bis zu m betragen kann. 
 Dies führt beim Random Forest zu einer erhöhten Geschwindigkeit bei der Erstellung eines Baumes.
-\section*{Nr.2}
-
-\section*{Nr.3}
-
+\section*{c}
+Die Trefferquote mit einem Baum liegt bei 83,54\%, mit 8 Bäumen bei 90,64\% und mit 64 Bäumen bei 93,41\%. Daraus folgt, dass mit steigender Anzahl an Bäumen auch die Trefferquote steigt. Da sich diese ab 2048 Bäumen bei 94,1\% einpendelt, geht das Wachstum der Trefferquote bei steigender Baumanzahl gegen 0.
+\section*{d}
+In 1000 Testfällen wurde das Car.arff Dataset zufällig in 66\% Trainingsdaten und 33\% Testdaten aufgeteilt. Anschließend wurden zum einen unser DecisionTree und zum anderen der WEKA-RandomForest mit default Werten (unter anderem 100 Bäume) mit den selben Trainingsdaten trainiert. Danach wurde bei beiden berechnet mit welchem Anteil die Testdaten richtig klassifiziert wurden. Dieser Wert wurde über die 1000 Testfälle gemittelt. Als Ergebnis erhielten wir, dass RandomForest im Vergleich zum DecisionTree 1,83 mal so viele Testdaten richtig klassifizieren konnte. Dies entspricht einem Zuwachs von 42,72\%.
 \end{document}

@@ -143,19 +143,19 @@ public class Tests {
         Instances trainS = getSplitSet(instances, trainsetIndex);
         Instances testS = getSplitSet(instances, testsetIndex);
 
-        for(int i = 0; i< n; i++) {
+
+        for(int i = 1; i< n; i*=2) {
 
             RandomForest randomForest = trainRandomForest(trainS, i);
 
             double performanceWekaRandomForest
-                    = evalWeka(randomForest, testS, trainS)/i;
+                    = evalWeka(randomForest, testS, trainS);
             System.out.println("For " + i + " Trees is the performance: "
                     + performanceWekaRandomForest);
         }
     }
 
     public static void main(String... args) throws Exception {
-System.out.println("MUH");
         File data = new File("res/car.arff");
         ArffLoader source = new ArffLoader();
         source.setFile(data);
@@ -165,7 +165,7 @@ System.out.println("MUH");
             instances.setClassIndex(instances.numAttributes() - 1);
         }
 
-        testRandomForest(100, data, instances);
+        testRandomForest(10000, data, instances);
 
         System.out.println();
 
