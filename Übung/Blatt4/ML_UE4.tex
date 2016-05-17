@@ -66,11 +66,19 @@ Die Grafiken verdeutlichen, dass der Bias zu Beginn sehr hoch ist, da der Sinus 
 
 
 \section*{Nr.3}
+\lstinputlisting[language = java]{code/Nr3.java}
 
 
 \section*{Nr.4}
 
 
 \section*{Nr.5}
+\[accuracy = \frac{TP + TN}{TP + FP + FN + TN}\]
+\[= \frac{TP}{P+N} + \frac{TN}{P+N}\]
+\[= \frac{P \cdot TP}{P \cdot (P+N)} + \frac{N \cdot TN}{N \cdot (P +N)}\]
+\[= \frac{TP}{P} \cdot \frac{P}{P+N} + \frac{TN}{N} \cdot \frac{N}{P+N} \]
+\[= \frac{TP}{P} \cdot \frac{P}{P+N} + \frac{TN}{N} \cdot \left(1- \frac{P}{P+N}\right) \]
+Mit A = $\frac{P}{P+N}$ folgt: 
+\[accuracy = sensitivity \cdot A + specificity \cdot (1-A)\]
 
 \end{document}
