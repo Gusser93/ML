@@ -1,3 +1,4 @@
+import com.sun.org.apache.xalan.internal.utils.FactoryImpl;
 import com.sun.org.apache.xpath.internal.functions.WrongNumberArgsException;
 import org.omg.CORBA.DynAnyPackage.InvalidValue;
 import sun.jvm.hotspot.types.WrongTypeException;
@@ -8,12 +9,13 @@ import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Utils;
 
-import java.util.ArrayList;
-import java.util.Random;
+import java.util.*;
 
 /**
  * Created by David on 24.05.16.
  */
+
+// extend RandomizableSingleClassifierEnhancer to use the method setClassifier
 
 public class CVParameterSelection extends Classifier {
 
@@ -84,8 +86,8 @@ public class CVParameterSelection extends Classifier {
     private int numFolds = DEFAULT_NUM_OF_FOLDS;
     // classifier for selection
     private Classifier classifier;
-    // error rate of best performance
-    private double lowestError = -1;
+    // lowest error rate
+    private double lowestError = Double.MAX_VALUE;
     // best options for this classifier
     private String[] bestOptions = null;
     // initial classifierOptions
@@ -219,6 +221,28 @@ public class CVParameterSelection extends Classifier {
     }
 
 
+    public String[] getBestClassifierOptions() {
+        // return bestOptionsArray by deleting empty entries
+        int size = 0;
+        for (String s : this.bestOptions) {
+            if (s.equals("") == false) {
+                size++;
+            }
+        }
+
+        // add values
+        String[] cleanBestOptions = new String[size];
+        int i = 0;
+        for (String s : this.bestOptions) {
+            if (s.equals("") == false) {
+                cleanBestOptions[i] = s;
+                i++;
+            }
+        }
+
+        return cleanBestOptions;
+    }
+
 
     //--------------------------------------------------------------------------
     //----------------------------classifier Operations-------------------------
@@ -232,24 +256,32 @@ public class CVParameterSelection extends Classifier {
         // remove all options from our classifier which are already set by this class
         // wekas Util.getOption method does this for us
         // Note: this changes the classifierOptions array
-        String[] classifierOptions = this.classifier.getOptions();
+        String[] classifierOptions = this.getClassifier().getOptions();
         for (CVParameter param : this.params) {
             Utils.getOption(param.paramChar, classifierOptions);
         }
 
-
         // create new array
-        int leng = classifierOptions.length;
-        String[] options = new String[leng + 2*this.params.size()];
-
-        // add classifier options
-        System.arraycopy(classifierOptions, 0, options, 0, leng);
+        int size = classifierOptions.length + 2*this.params.size();
+        String[] options = new String[size];
 
         // add crossvalidation options of this class
-        for (int i = leng; i<leng+this.params.size()*2; i++) {
-            CVParameter param = this.params.get(i);
-            options[i] = String.valueOf(param.paramChar);
-            options[i+1] = String.valueOf(param.value);
+        int i = 0;
+        for (CVParameter param : this.params) {
+            options[i++] = "-"+String.valueOf(param.paramChar);
+            options[i++] = String.valueOf(param.value);
+        }
+
+        // add classifier options
+        for (String opt : classifierOptions) {
+            if (opt.equals("") == false) {
+                options[i++] = opt;
+            }
+        }
+
+        // fill the rest
+        while (i < size) {
+            options[i++] = "";
         }
 
         return options;
@@ -257,14 +289,14 @@ public class CVParameterSelection extends Classifier {
 
     /**
      *
-     * @param depth
-     * @param trainData
+     * @param paramIdx
+     * @param dataset
      * @throws Exception
      */
-    private void calculateBestClassifierOptions(int depth, Instances trainData) throws Exception {
-        if (depth < this.params.size()) {
+    private void calculateBestValuesForOptions(int paramIdx, Instances dataset) throws Exception {
+        if (paramIdx < this.params.size()) {
             // repeat for each parameter
-            CVParameter param = this.params.get(depth);
+            CVParameter param = this.params.get(paramIdx);
 
             // calculate our increment value
             double u, l, s;
@@ -272,44 +304,45 @@ public class CVParameterSelection extends Classifier {
             l = param.lowerBound;
             s = param.stepValue;
 
-            // Todo is this increment right
-            double inc = (u-l)/s;
+            double inc = (u-l)/(s-1);
             for (param.value = l; param.value <= u; param.value+=inc) {
                 // calculate param.value => best options
-                calculateBestClassifierOptions(depth+1, trainData);
+                calculateBestValuesForOptions(paramIdx+1, dataset);
             }
-
         } else {
-            Evaluation eval = new Evaluation(trainData);
+            Evaluation eval = new Evaluation(dataset);
 
             // get combined options
             String[] options = this.getCombinedOptions();
-
             // set the option for our classifier
+            // note this deletes our option array
             this.classifier.setOptions(options);
 
-            // for each fold
             int nFolds = this.getNumberOfFolds();
             for (int i = 0; i<nFolds; i++) {
                 // get a trainset and a testset
                 // randomize the data the same way each time
                 // i-te fold
-                Instances train = trainData.trainCV(nFolds, i, new Random(1));
+                Instances train = dataset.trainCV(nFolds, i, new Random(1));
                 // is not important to randomize the same way with our test set
-                Instances test = trainData.testCV(nFolds, i);
+                Instances test = dataset.testCV(nFolds, i);
                 // build our classifier
-                this.classifier.buildClassifier(train);
-                //eval.setPriors(train); //warum?
+                this.getClassifier().buildClassifier(train);
+                // reset Prior probability of the evaluation
+                eval.setPriors(train);
                 // evaluate our model for each fold
-                eval.evaluateModel(this.classifier, test);
+                eval.evaluateModel(this.getClassifier(), test);
             }
 
             // get our error rate and save the options if the error rate is
             // better than the last one
             double errorRate = eval.errorRate();
-            if (this.lowestError == -1 || errorRate < this.lowestError) {
+            /*System.out.print(errorRate);
+            System.out.print(" < ");
+            System.out.println(this.lowestError);*/
+            if (errorRate < this.lowestError) {
                 this.lowestError = errorRate;
-                this.bestOptions = options;
+                this.bestOptions = this.getCombinedOptions();
             }
         }
     }
@@ -342,11 +375,15 @@ public class CVParameterSelection extends Classifier {
             this.bestOptions = this.initClassifierOptions;
         } else {
             // calculate bestOptions
-            this.calculateBestClassifierOptions(0, trainData);
+            this.calculateBestValuesForOptions(0, trainData);
 
             // set bestOptions for our classifier and build it
-            this.classifier.setOptions(this.bestOptions);
-            this.buildClassifier(trainData);
+            // make a copy of our options, because training the classifier deletes the entries
+            String[] opt = new String[this.bestOptions.length];
+            System.arraycopy(this.bestOptions, 0, opt, 0, opt.length);
+
+            this.getClassifier().setOptions(opt);
+            this.getClassifier().buildClassifier(trainData);
         }
 
     }

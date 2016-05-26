@@ -9,14 +9,14 @@ import weka.core.Capabilities;
  * Created by David on 24.05.16.
  */
 public class OptimalJ48 extends Classifier {
-    private CVParameterSelection selection;
-    private String[] OPTIONS = {"C 0.0 0.5 10"};
+    protected CVParameterSelection selection;
+    private String[] OPTIONS = {"C 0.1 0.5 10"};
 
     public OptimalJ48() throws Exception {
         J48 temp = new J48();
         this.selection = new CVParameterSelection();
         selection.setCVParameters(OPTIONS);
-        selection.setNumberOfFolds(15);
+        //selection.setNumberOfFolds(15);
         selection.setClassifier(temp);
     }
 
