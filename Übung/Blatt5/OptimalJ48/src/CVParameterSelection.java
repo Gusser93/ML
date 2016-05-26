@@ -15,8 +15,6 @@ import java.util.Random;
  * Created by David on 24.05.16.
  */
 
-// extend RandomizableSingleClassifierEnhancer to use the method setClassifier
-
 public class CVParameterSelection extends Classifier {
 
 
