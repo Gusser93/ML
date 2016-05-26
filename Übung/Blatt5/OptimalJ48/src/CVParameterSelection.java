@@ -3,6 +3,7 @@ import org.omg.CORBA.DynAnyPackage.InvalidValue;
 import sun.jvm.hotspot.types.WrongTypeException;
 import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;
+import weka.core.Capabilities;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Utils;
@@ -16,7 +17,7 @@ import java.util.Random;
 
 // extend RandomizableSingleClassifierEnhancer to use the method setClassifier
 
-public class CVParameterSelection {
+public class CVParameterSelection extends Classifier {
 
 
     //--------------------------------------------------------------------------
@@ -26,7 +27,6 @@ public class CVParameterSelection {
     // internal class that represents one parameter
     protected class CVParameter {
 
-        protected String param;
         protected char paramChar;
         protected double lowerBound;
         protected double upperBound;
@@ -34,52 +34,38 @@ public class CVParameterSelection {
         // current value to test
         protected double value;
 
+
         /**
          *
-         * @param param actual parameter with its values as string
+         * @param paramChar
+         * @param lowerBound
+         * @param upperBound
+         * @param steps
+         * @throws Exception
          */
-        public CVParameter(String param) throws Exception {
-            this.param = param;
+        public CVParameter(char paramChar, double lowerBound, double upperBound, double steps) throws Exception {
+            this.paramChar = paramChar;
+            this.lowerBound = lowerBound;
+            this.upperBound = upperBound;
+            this.stepValue = steps;
 
-            // split parameter in its arguments
-            // we need at least 4 and at most 5 values
-            String[] args = this.param.split(" ");
-            if (args.length == 4 || args.length == 5) {
-                // save parameter character
-                String paramString = args[0];
-                if (paramString.length() != 1) {
-                    throw new IllegalArgumentException("Invalid parameter char.");
-                } else {
-                    this.paramChar = paramString.charAt(0);
-                }
-
-                // save lower bound, upper bound and steps
-                try {
-                    this.lowerBound = Double.parseDouble(args[1]);
-                    this.upperBound = Double.parseDouble(args[2]);
-                    this.stepValue = Double.parseDouble(args[3]);
-                } catch (NumberFormatException e) {
-                    throw new WrongTypeException("Invalid values for parameter " + paramString);
-                }
-
-                // check if values are valid
-                if (this.lowerBound > this.upperBound) {
-                    throw new InvalidValue("Lower bound must be lesser than or equal to upper bound");
-                }
-
-                // todo add -R
-
-            } else {
-                throw new WrongNumberArgsException("At least 4 values are required.");
+            // check if values are valid
+            if (this.lowerBound > this.upperBound) {
+                throw new InvalidValue("Lower bound must be lesser than or equal to upper bound");
             }
         }
 
         /**
-         *
+         * Input string given by the user
          * @return name of parameter
          */
         protected String getParameterString() {
-            return this.param;
+            String p = String.valueOf(this.paramChar);
+            String u = String.valueOf(this.upperBound);
+            String l = String.valueOf(this.lowerBound);
+            String s = String.valueOf(this.stepValue);
+
+            return (p + " " + l + " " + u + " " + s);
         }
     }
 
@@ -101,7 +87,7 @@ public class CVParameterSelection {
     // classifier for selection
     private Classifier classifier;
     // error rate of best performance
-    private double bestPerformance = -1;
+    private double lowestError = -1;
     // best options for this classifier
     private String[] bestOptions = null;
     // initial classifierOptions
@@ -128,7 +114,40 @@ public class CVParameterSelection {
      */
     public void addCVParameter(String param) throws Exception {
         // we expect a string in format: 'N lower_bound upper_bound steps'
-        this.params.add(new CVParameter(param));
+
+        // split parameter in its arguments
+        // we need exactly 4 values
+        char paramChar;
+        double lowerBound, upperBound, steps;
+        String[] args = param.split(" ");
+
+        // check input
+        if (args.length == 4) {
+            // get parameter character
+            String paramString = args[0];
+            if (paramString.length() != 1) {
+                throw new IllegalArgumentException("Invalid parameter char.");
+            } else {
+                paramChar = paramString.charAt(0);
+            }
+
+            // save lower bound, upper bound and steps
+            try {
+                lowerBound = Double.parseDouble(args[1]);
+                upperBound = Double.parseDouble(args[2]);
+                steps = Double.parseDouble(args[3]);
+            } catch (NumberFormatException e) {
+                throw new WrongTypeException("Invalid values for parameter " + paramString);
+            }
+
+            // add CVParameter
+            CVParameter tmp = new CVParameter(paramChar, lowerBound, upperBound, steps);
+            this.params.add(tmp);
+
+
+        } else {
+            throw new WrongNumberArgsException("At least 4 values are required.");
+        }
     }
 
 
@@ -153,40 +172,6 @@ public class CVParameterSelection {
         }
     }
 
-    /**
-     *
-     * @param options
-     * @throws Exception
-     */
-    public void setOptions(String[] options) throws Exception {
-        // -X
-        String numFoldStr = Utils.getOption('X', options);
-        if (numFoldStr.length() > 0) {
-            try {
-                // try to convert the number of folds to an integer
-                this.setNumberOfFolds(Integer.parseInt(numFoldStr));
-            } catch (NumberFormatException e) {
-                throw new IllegalArgumentException("Invalid value for argument X");
-            }
-        } else {
-            // x was not set => use default Value
-            this.setNumberOfFolds(DEFAULT_NUM_OF_FOLDS);
-        }
-
-
-        // -P
-        // Input example ['-P', 'N 10 23 2' , 'U 5 2 1']
-        String paramString = Utils.getOption('P', options);
-
-        // as long as we find a parameter after '-P'
-        // add a CVParameter
-        while (paramString.length() != 0) {
-            this.addCVParameter(paramString);
-            paramString = Utils.getOption('P', options);
-        }
-
-        //Todo Implement Rest of options
-    }
 
 
     //--------------------------------------------------------------------------
@@ -222,7 +207,7 @@ public class CVParameterSelection {
     public String[] getCVParameters() {
         String[] paramNames = new String[this.params.size()];
         for (int i = 0; i < paramNames.length; i++) {
-            paramNames[i] = this.params.get(i).getParameterString();
+            paramNames[i] = this.getCVParameter(i);
         }
         return paramNames;
     }
@@ -235,28 +220,6 @@ public class CVParameterSelection {
         return this.numFolds;
     }
 
-
-    /**
-     *
-     * @return options which are set
-     */
-    public String[] getOptions() {
-        //2 for x, 1 for P
-        int size = 2+1+this.params.size();
-
-        String[] options = new String[size];
-
-        // add all options to the array
-        int current = 0;
-        options[current++] = "-P";
-        for (int i = 0; i < this.params.size(); i++) {
-            options[current++] = this.getCVParameter(i);
-        }
-        options[current++] = "-X";
-        options[current++] = String.valueOf(this.getNumberOfFolds());
-
-        return options;
-    }
 
 
     //--------------------------------------------------------------------------
@@ -272,9 +235,10 @@ public class CVParameterSelection {
         // wekas Util.getOption method does this for us
         // Note: this changes the classifierOptions array
         String[] classifierOptions = this.classifier.getOptions();
-        for(CVParameter param : this.params) { 
-            Utils.getOption(param.paramChar, classifierOptions); 
+        for (CVParameter param : this.params) {
+            Utils.getOption(param.paramChar, classifierOptions);
         }
+
 
         // create new array
         int leng = classifierOptions.length;
@@ -345,18 +309,28 @@ public class CVParameterSelection {
             // get our error rate and save the options if the error rate is
             // better than the last one
             double errorRate = eval.errorRate();
-            if (this.bestPerformance < 0 || errorRate < this.bestPerformance) {
-                this.bestPerformance = errorRate;
+            if (this.lowestError == -1 || errorRate < this.lowestError) {
+                this.lowestError = errorRate;
                 this.bestOptions = options;
             }
         }
     }
+
+
+
+
+    //--------------------------------------------------------------------------
+    //--------------------------------Overrides---------------------------------
+    //--------------------------------------------------------------------------
+
+
 
     /**
      * Build classifier with bestOptions
      * @param instances
      * @throws Exception
      */
+    @Override
     public void buildClassifier(Instances instances) throws Exception {
         Instances trainData = new Instances(instances);
 
@@ -379,13 +353,27 @@ public class CVParameterSelection {
 
     }
 
+
+    /**
+     *
+     * @return
+     */
+    @Override
+    public Capabilities getCapabilities() {
+        Capabilities cap = super.getCapabilities();
+        cap.setMinimumNumberInstances(this.getNumberOfFolds());
+        return cap;
+    }
+
+
     /**
      *
      * @param instance
      * @return
      * @throws Exception
      */
-    public double[] distributionForInstance(Instance instance) throws Exception { 
-        return this.getClassifier().distributionForInstance(instance); 
+    @Override
+    public double[] distributionForInstance(Instance instance) throws Exception {
+        return this.getClassifier().distributionForInstance(instance);
     }
 }
