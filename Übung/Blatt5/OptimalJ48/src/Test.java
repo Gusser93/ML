@@ -6,6 +6,7 @@ import weka.core.converters.ConverterUtils;
 import java.io.IOException;
 import java.text.NumberFormat;
 import java.util.*;
+import java.util.stream.DoubleStream;
 
 /**
  * Created by markus on 24.05.16.
@@ -17,31 +18,58 @@ public class Test {
             data.setClassIndex(data.numAttributes() - 1);
         }
 
-        //testPruning(data, 10, 0.0f, 0.5f, 10);
+        testPruning(data, 10, 0.01f, 0.5f, 100, 1, "Pruningx1");
+        testPruning(data, 10, 0.01f, 0.5f, 100, 1, "Pruningx2");
+        testPruning(data, 10, 0.01f, 0.5f, 100, 1, "Pruningx3");
+        testPruning(data, 10, 0.01f, 0.5f, 100, 1, "Pruningx4");
 
-        for (int i = 0; i <20; i++) {
+        testPruning(data, 10, 0.01f, 0.5f, 100, 10, "Pruningx10");
+        testPruning(data, 10, 0.01f, 0.5f, 100, 10, "Pruningx20");
+        testPruning(data, 10, 0.01f, 0.5f, 100, 10, "Pruningx30");
+        testPruning(data, 10, 0.01f, 0.5f, 100, 10, "Pruningx40");
+
+        testPruning(data, 10, 0.01f, 0.5f, 100, 100, "Pruningx100");
+        testPruning(data, 10, 0.01f, 0.5f, 100, 100, "Pruningx200");
+        testPruning(data, 10, 0.01f, 0.5f, 100, 100, "Pruningx300");
+        testPruning(data, 10, 0.01f, 0.5f, 100, 100, "Pruningx400");
+
+        testPruning(data, 10, 0.01f, 0.5f, 100, 1000, "Pruningx1000");
+
+        /*for (int i = 0; i <20; i++) {
             OptimalJ48 j48 = new OptimalJ48();
             j48.buildClassifier(data);
             System.out.println(Arrays.toString(j48.selection.getBestClassifierOptions()));
-        }
+        }*/
     }
 
     public static void testPruning(Instances data, int numFolds, float
-            lowerBorder, float upperBorder, int steps) throws Exception {
-        double[] accuracy = new double[steps];
+            lowerBorder, float upperBorder, int steps, int repeats,
+            String title) throws Exception {
+        double[][] accuracy = new double[steps][repeats];
         double[] x = new double[steps];
-        float dx = (upperBorder - lowerBorder)/steps;
+        float dx = (upperBorder - lowerBorder)/(steps - 1);
 
-        for (int i = 0; i < steps; i++) {
-            float c = lowerBorder + i*dx;
-            J48 classifier = new J48();
-            Evaluation eval = new Evaluation(data);
-            eval.crossValidateModel(classifier, data, numFolds, new Random());
-            accuracy[i] = eval.pctCorrect() / 100.0;
-            x[i] = c;
+        for (int j = 0; j < repeats; j++) {
+            for (int i = 0; i < steps; i++) {
+                float c = lowerBorder + i * dx;
+                J48 classifier = new J48();
+                classifier.setConfidenceFactor(c);
+                Evaluation eval = new Evaluation(data);
+                eval.crossValidateModel(classifier, data, numFolds,
+                        new Random());
+                accuracy[i][j] = eval.pctCorrect() / 100.0;
+                x[i] = c;
+            }
         }
 
-        plotWithPython("Pruning", "pruning confidence", "accuracy", x, accuracy);
+        double[] result = new double[steps];
+        for (int i = 0; i < steps; i++) {
+            double tmp = DoubleStream.of(accuracy[i]).parallel().sum();
+            result[i] = tmp / repeats;
+        }
+
+        plotWithPython(title, "pruning confidence", "accuracy", x,
+                result);
 
     }
 

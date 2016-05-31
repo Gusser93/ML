@@ -1,7 +1,5 @@
-import com.sun.org.apache.xalan.internal.utils.FactoryImpl;
 import com.sun.org.apache.xpath.internal.functions.WrongNumberArgsException;
 import org.omg.CORBA.DynAnyPackage.InvalidValue;
-import sun.jvm.hotspot.types.WrongTypeException;
 import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;
 import weka.core.Capabilities;
@@ -9,7 +7,8 @@ import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Utils;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Random;
 
 /**
  * Created by David on 24.05.16.
@@ -137,7 +136,7 @@ public class CVParameterSelection extends Classifier {
                 upperBound = Double.parseDouble(args[2]);
                 steps = Double.parseDouble(args[3]);
             } catch (NumberFormatException e) {
-                throw new WrongTypeException("Invalid values for parameter " + paramString);
+                throw new Exception("Invalid values for parameter " + paramString);
             }
 
             // add CVParameter
