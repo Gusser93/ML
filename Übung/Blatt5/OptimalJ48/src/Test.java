@@ -6,6 +6,7 @@ import weka.core.converters.ConverterUtils;
 import java.io.IOException;
 import java.text.NumberFormat;
 import java.util.*;
+import java.util.stream.DoubleStream;
 
 /**
  * Created by markus on 24.05.16.
@@ -17,8 +18,6 @@ public class Test {
             data.setClassIndex(data.numAttributes() - 1);
         }
 
-        testPruning(data, 10, 0.0f, 0.5f, 10);
-
         /*for (int i = 0; i <20; i++) {
             OptimalJ48 j48 = new OptimalJ48();
             j48.buildClassifier(data);
@@ -27,21 +26,33 @@ public class Test {
     }
 
     public static void testPruning(Instances data, int numFolds, float
-            lowerBorder, float upperBorder, int steps) throws Exception {
-        double[] accuracy = new double[steps];
+            lowerBorder, float upperBorder, int steps, int repeats,
+            String title) throws Exception {
+        double[][] accuracy = new double[steps][repeats];
         double[] x = new double[steps];
-        float dx = (upperBorder - lowerBorder)/steps;
+        float dx = (upperBorder - lowerBorder)/(steps - 1);
 
-        for (int i = 0; i < steps; i++) {
-            float c = lowerBorder + i*dx;
-            J48 classifier = new J48();
-            Evaluation eval = new Evaluation(data);
-            eval.crossValidateModel(classifier, data, numFolds, new Random());
-            accuracy[i] = eval.pctCorrect() / 100.0;
-            x[i] = c;
+        for (int j = 0; j < repeats; j++) {
+            for (int i = 0; i < steps; i++) {
+                float c = lowerBorder + i * dx;
+                J48 classifier = new J48();
+                classifier.setConfidenceFactor(c);
+                Evaluation eval = new Evaluation(data);
+                eval.crossValidateModel(classifier, data, numFolds,
+                        new Random());
+                accuracy[i][j] = eval.pctCorrect() / 100.0;
+                x[i] = c;
+            }
         }
 
-        plotWithPython("Pruning", "pruning confidence", "accuracy", x, accuracy);
+        double[] result = new double[steps];
+        for (int i = 0; i < steps; i++) {
+            double tmp = DoubleStream.of(accuracy[i]).parallel().sum();
+            result[i] = tmp / repeats;
+        }
+
+        plotWithPython(title, "pruning confidence", "accuracy", x,
+                result);
 
     }
 
