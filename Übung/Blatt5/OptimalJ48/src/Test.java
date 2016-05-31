@@ -13,33 +13,47 @@ import java.util.stream.DoubleStream;
  */
 public class Test {
     public static void main(String... args) throws Exception {
-        Instances data = ConverterUtils.DataSource.read("res/car.arff");
-        if (data.classIndex() == -1) {
-            data.setClassIndex(data.numAttributes() - 1);
-        }
 
-        testPruning(data, 10, 0.01f, 0.5f, 100, 1, "Pruningx1");
-        testPruning(data, 10, 0.01f, 0.5f, 100, 1, "Pruningx2");
-        testPruning(data, 10, 0.01f, 0.5f, 100, 1, "Pruningx3");
-        testPruning(data, 10, 0.01f, 0.5f, 100, 1, "Pruningx4");
+        Instances car = load("res/car.arff");
+        Instances autos = load("res/autos.arff");
+        Instances vehicle = load("res/vehicle.arff");
 
-        testPruning(data, 10, 0.01f, 0.5f, 100, 10, "Pruningx10");
-        testPruning(data, 10, 0.01f, 0.5f, 100, 10, "Pruningx20");
-        testPruning(data, 10, 0.01f, 0.5f, 100, 10, "Pruningx30");
-        testPruning(data, 10, 0.01f, 0.5f, 100, 10, "Pruningx40");
 
-        testPruning(data, 10, 0.01f, 0.5f, 100, 100, "Pruningx100");
-        testPruning(data, 10, 0.01f, 0.5f, 100, 100, "Pruningx200");
-        testPruning(data, 10, 0.01f, 0.5f, 100, 100, "Pruningx300");
-        testPruning(data, 10, 0.01f, 0.5f, 100, 100, "Pruningx400");
+        testPruning(car, 10, 0.01f, 0.5f, 10, 10, "Pruning car x10");
+        testPruning(autos, 10, 0.01f, 0.5f, 10, 10, "Pruning autos x10");
+        testPruning(vehicle, 10, 0.01f, 0.5f, 10, 10, "Pruning vehicle x10");
 
-        testPruning(data, 10, 0.01f, 0.5f, 100, 1000, "Pruningx1000");
+        testCVPS(car, 10, 10, "car");
+        testCVPS(autos, 10, 10, "autos");
+        testCVPS(vehicle, 10, 10, "vehicle");
+
+        String[] carOpt = getPrune(car);
+        String[] autosOpt = getPrune(autos);
+        String[] vehicleOpt = getPrune(vehicle);
+
+        System.out.println("car");
+        System.out.println(Arrays.toString(carOpt));
+        System.out.println();
+        System.out.println("autos");
+        System.out.println(Arrays.toString(autosOpt));
+        System.out.println();
+        System.out.println("vehicle");
+        System.out.println(Arrays.toString(vehicleOpt));
+        System.out.println();
 
         /*for (int i = 0; i <20; i++) {
             OptimalJ48 j48 = new OptimalJ48();
             j48.buildClassifier(data);
             System.out.println(Arrays.toString(j48.selection.getBestClassifierOptions()));
         }*/
+    }
+
+    public static Instances load(String path) throws Exception {
+        Instances data = ConverterUtils.DataSource.read(path);
+        if (data.classIndex() == -1) {
+            data.setClassIndex(data.numAttributes() - 1);
+        }
+        return data;
     }
 
     public static void testPruning(Instances data, int numFolds, float
@@ -71,6 +85,28 @@ public class Test {
         plotWithPython(title, "pruning confidence", "accuracy", x,
                 result);
 
+    }
+
+    public static void testCVPS(Instances data, int folds, int repeats,
+                                String name) throws Exception {
+        double acc = 0.0;
+        double prune = 0.0;
+        for (int i = 0; i < repeats; i++) {
+            OptimalJ48 oj48 = new OptimalJ48();
+            Evaluation eval = new Evaluation(data);
+            eval.crossValidateModel(oj48, data, folds, new Random());
+            acc += eval.pctCorrect() / 100.0 / repeats;
+        }
+
+        System.out.println("Name: " + name);
+        System.out.println("Accuracy: " + acc);
+        System.out.println();
+    }
+
+    public static String[] getPrune(Instances data) throws Exception {
+        OptimalJ48 oj48 = new OptimalJ48();
+        oj48.buildClassifier(data);
+        return oj48.selection.getBestClassifierOptions();
     }
 
     public static void plotWithPython(String title, String xLabel, String

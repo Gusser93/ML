@@ -1,0 +1,17 @@
+Name: car
+Accuracy: 0.9314236111111109
+
+Name: autos
+Accuracy: 0.8165853658536584
+
+Name: vehicle
+Accuracy: 0.7290780141843971
+
+car
+[-C, 0.32222222222222224, -M, 2]
+
+autos
+[-C, 0.14444444444444446, -M, 2]
+
+vehicle
+[-C, 0.1, -M, 2]

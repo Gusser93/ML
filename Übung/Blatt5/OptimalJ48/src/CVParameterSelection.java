@@ -2,11 +2,9 @@ import com.sun.org.apache.xpath.internal.functions.WrongNumberArgsException;
 import org.omg.CORBA.DynAnyPackage.InvalidValue;
 import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;
-import weka.core.Capabilities;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.Utils;
+import weka.core.*;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Random;
 
@@ -16,7 +14,8 @@ import java.util.Random;
 
 // extend RandomizableSingleClassifierEnhancer to use the method setClassifier
 
-public class CVParameterSelection extends Classifier {
+public class CVParameterSelection extends Classifier implements Serializable,
+        Cloneable {
 
 
     //--------------------------------------------------------------------------
@@ -24,7 +23,7 @@ public class CVParameterSelection extends Classifier {
     //--------------------------------------------------------------------------
 
     // internal class that represents one parameter
-    protected class CVParameter {
+    protected class CVParameter implements Serializable{
 
         protected char paramChar;
         protected double lowerBound;
