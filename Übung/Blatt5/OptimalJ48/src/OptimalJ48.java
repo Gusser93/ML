@@ -1,5 +1,4 @@
 import weka.core.*;
-
 import java.util.Random;
 import weka.classifiers.Classifier;
 import weka.classifiers.trees.J48;
@@ -93,7 +92,10 @@ public class OptimalJ48 extends Classifier {
     }
 
 
+    // e)
+    
     /**
+     * User pieces=3 for trainset, validationset and testset
      * @param pieces number of pieces to split the data
      * @return Array containing number of pieces Instances
      */

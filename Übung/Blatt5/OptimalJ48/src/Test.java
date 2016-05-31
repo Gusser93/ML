@@ -17,13 +17,13 @@ public class Test {
             data.setClassIndex(data.numAttributes() - 1);
         }
 
-        //testPruning(data, 10, 0.0f, 0.5f, 10);
+        testPruning(data, 10, 0.0f, 0.5f, 10);
 
-        for (int i = 0; i <20; i++) {
+        /*for (int i = 0; i <20; i++) {
             OptimalJ48 j48 = new OptimalJ48();
             j48.buildClassifier(data);
             System.out.println(Arrays.toString(j48.selection.getBestClassifierOptions()));
-        }
+        }*/
     }
 
     public static void testPruning(Instances data, int numFolds, float
