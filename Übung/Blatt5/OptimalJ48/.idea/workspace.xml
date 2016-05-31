@@ -2,39 +2,19 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="778f33d2-b741-4216-9ef6-e8975eea84a8" name="Default" comment="">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/Pruning autos x10.eps" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/Pruning car x10.eps" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/Pruning vehicle x10.eps" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/res/autos.arff" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/res/vehicle.arff" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/Pruning1.eps" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/Pruning10.eps" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/Pruning100.eps" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/Pruning2.eps" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/Pruning20.eps" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/Pruning200.eps" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/Pruning3.eps" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/Pruning30.eps" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/Pruning300.eps" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/Pruning4.eps" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/Pruning40.eps" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/Pruning400.eps" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/Pruningx1.eps" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/Pruningx10.eps" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/Pruningx100.eps" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/Pruningx1000.eps" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/Pruningx2.eps" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/Pruningx20.eps" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/Pruningx200.eps" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/Pruningx3.eps" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/Pruningx30.eps" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/Pruningx300.eps" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/Pruningx4.eps" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/Pruningx40.eps" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/Pruningx400.eps" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../Blatt04/OptimalJ48/PruningNice.eps" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../Blatt04/OptimalJ48/plot.py" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../Blatt04/OptimalJ48/res/car.arff" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../Blatt04/OptimalJ48/src/OptimalJ48.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../Blatt04/OptimalJ48/src/Test.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/PruningNice.eps" afterPath="" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/CVParameterSelection.java" afterPath="$PROJECT_DIR$/src/CVParameterSelection.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/Test.java" afterPath="$PROJECT_DIR$/src/Test.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/old/Pruning autos x100.eps" afterPath="$PROJECT_DIR$/old/Pruning autos x100.eps" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/old/Pruning car x100.eps" afterPath="$PROJECT_DIR$/old/Pruning car x100.eps" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/old/Pruning car x100OLD.eps" afterPath="$PROJECT_DIR$/old/Pruning car x100OLD.eps" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/old/Pruning car x20.eps" afterPath="$PROJECT_DIR$/old/Pruning car x20.eps" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/old/Pruning kr-vd-kp x100.eps" afterPath="$PROJECT_DIR$/old/Pruning kr-vd-kp x100.eps" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/OptimalJ48.java" afterPath="$PROJECT_DIR$/src/OptimalJ48.java" />
     </list>
     <ignored path="OptimalJ48.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -59,8 +39,8 @@
       <file leaf-file-name="Test.java" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/Test.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="452">
-              <caret line="105" column="45" selection-start-line="105" selection-start-column="45" selection-end-line="105" selection-end-column="45" />
+            <state relative-caret-position="240">
+              <caret line="16" column="0" selection-start-line="16" selection-start-column="0" selection-end-line="16" selection-end-column="0" />
               <folding>
                 <element signature="imports" expanded="true" />
               </folding>
@@ -83,9 +63,11 @@
       <file leaf-file-name="OptimalJ48.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/OptimalJ48.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="75">
-              <caret line="10" column="13" selection-start-line="10" selection-start-column="13" selection-end-line="10" selection-end-column="13" />
-              <folding />
+            <state relative-caret-position="120">
+              <caret line="9" column="13" selection-start-line="9" selection-start-column="13" selection-end-line="9" selection-end-column="13" />
+              <folding>
+                <marker date="1464708545983" expanded="true" signature="3266:3389" placeholder="/**...*/" />
+              </folding>
             </state>
           </provider>
         </entry>
@@ -845,16 +827,16 @@
       <option name="presentableId" value="Default" />
       <updated>1464696167611</updated>
       <workItem from="1464696169880" duration="3789000" />
-      <workItem from="1464704468397" duration="3699000" />
+      <workItem from="1464704468397" duration="4094000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="7488000" />
+    <option name="totallyTimeSpent" value="7883000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="0" y="27" width="960" height="1053" extended-state="4" />
-    <editor active="false" />
+    <editor active="true" />
     <layout>
       <window_info id="Palette" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
@@ -864,7 +846,7 @@
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
       <window_info id="Maven Projects" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="Run" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.65111345" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.26299044" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Capture Tool" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Designer" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
@@ -916,16 +898,18 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/OptimalJ48.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="75">
-          <caret line="10" column="13" selection-start-line="10" selection-start-column="13" selection-end-line="10" selection-end-column="13" />
-          <folding />
+        <state relative-caret-position="120">
+          <caret line="9" column="13" selection-start-line="9" selection-start-column="13" selection-end-line="9" selection-end-column="13" />
+          <folding>
+            <marker date="1464708545983" expanded="true" signature="3266:3389" placeholder="/**...*/" />
+          </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/Test.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="452">
-          <caret line="105" column="45" selection-start-line="105" selection-start-column="45" selection-end-line="105" selection-end-column="45" />
+        <state relative-caret-position="240">
+          <caret line="16" column="0" selection-start-line="16" selection-start-column="0" selection-end-line="16" selection-end-column="0" />
           <folding>
             <element signature="imports" expanded="true" />
           </folding>
