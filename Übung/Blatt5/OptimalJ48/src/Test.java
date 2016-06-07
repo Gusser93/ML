@@ -27,9 +27,9 @@ public class Test {
         testCVPS(autos, 10, 10, "autos");
         testCVPS(vehicle, 10, 10, "vehicle");
 
-        String[] carOpt = getPrune(car);
-        String[] autosOpt = getPrune(autos);
-        String[] vehicleOpt = getPrune(vehicle);
+        String[] carOpt = getOptions(car);
+        String[] autosOpt = getOptions(autos);
+        String[] vehicleOpt = getOptions(vehicle);
 
         System.out.println("car");
         System.out.println(Arrays.toString(carOpt));
@@ -40,14 +40,14 @@ public class Test {
         System.out.println("vehicle");
         System.out.println(Arrays.toString(vehicleOpt));
         System.out.println();
-
-        /*for (int i = 0; i <20; i++) {
-            OptimalJ48 j48 = new OptimalJ48();
-            j48.buildClassifier(data);
-            System.out.println(Arrays.toString(j48.selection.getBestClassifierOptions()));
-        }*/
     }
 
+    /**
+     * loads Dataset
+     * @param path path to dataset
+     * @return dataset
+     * @throws Exception
+     */
     public static Instances load(String path) throws Exception {
         Instances data = ConverterUtils.DataSource.read(path);
         if (data.classIndex() == -1) {
@@ -56,6 +56,17 @@ public class Test {
         return data;
     }
 
+    /**
+     * tests pruning settings of J48 and saves graph as eps
+     * @param data dataset
+     * @param numFolds number of folds
+     * @param lowerBorder start value for pruning
+     * @param upperBorder end value
+     * @param steps number of steps
+     * @param repeats number of repeats fpr average
+     * @param title title for graph
+     * @throws Exception
+     */
     public static void testPruning(Instances data, int numFolds, float
             lowerBorder, float upperBorder, int steps, int repeats,
             String title) throws Exception {
@@ -87,10 +98,17 @@ public class Test {
 
     }
 
+    /**
+     * tests CVParameterSelection
+     * @param data dataset
+     * @param folds number of folds
+     * @param repeats number of repeats
+     * @param name name for output
+     * @throws Exception
+     */
     public static void testCVPS(Instances data, int folds, int repeats,
                                 String name) throws Exception {
         double acc = 0.0;
-        double prune = 0.0;
         for (int i = 0; i < repeats; i++) {
             OptimalJ48 oj48 = new OptimalJ48();
             Evaluation eval = new Evaluation(data);
@@ -103,12 +121,27 @@ public class Test {
         System.out.println();
     }
 
-    public static String[] getPrune(Instances data) throws Exception {
+    /**
+     * returns pruning for a given dataset in CVParameterSelection
+     * @param data dataset
+     * @return Options String array
+     * @throws Exception
+     */
+    public static String[] getOptions(Instances data) throws Exception {
         OptimalJ48 oj48 = new OptimalJ48();
         oj48.buildClassifier(data);
         return oj48.selection.getBestClassifierOptions();
     }
 
+    /**
+     * plots a given graph with plot.py
+     * @param title title of graph
+     * @param xLabel label for x axis
+     * @param yLabel label for y axis
+     * @param x values for x
+     * @param y values for y
+     * @throws IOException
+     */
     public static void plotWithPython(String title, String xLabel, String
             yLabel, double[] x, double[] y) throws IOException {
         NumberFormat nf = NumberFormat.getInstance(Locale.ENGLISH);
@@ -144,12 +177,24 @@ public class Test {
         }
     }
 
+    /**
+     * helper for python formatting
+     * @param flag cl flag
+     * @param arg cl arg
+     * @return formatted cl argument
+     */
     private static String getArgument(String flag, String arg) {
         StringBuilder options = new StringBuilder("");
         options.append("--").append(flag).append("=").append(arg).append(" ");
         return options.toString();
     }
 
+    /**
+     * helper for python formatting
+     * @param flag cl flag
+     * @param arg cl arg
+     * @return formatted cl argument
+     */
     private static String getStringArgument(String flag, String arg) {
         StringBuilder options = new StringBuilder("");
         options.append("--").append(flag).append("='").append(arg).append
