@@ -1,0 +1,45 @@
+\documentclass[a4paper,11pt,twoside]{scrartcl}
+\usepackage[T1]{fontenc}
+\usepackage{subcaption}
+\usepackage[utf8]{inputenc}
+\usepackage{ngerman, eucal, mathrsfs, amsfonts, bbm, amsmath, amssymb, stmaryrd,graphicx, array, geometry, color, wrapfig, float, hyperref}
+\geometry{left=25mm, right=15mm, bottom=25mm}
+\setlength{\parindent}{0em} 
+\setlength{\headheight}{0em} 
+\title{Machine Learning\\ Blatt 6}
+\author{Markus Vieth\and David Klopp\and Christian Stricker}
+\date{\today}
+\input{../head/lstlisting.tex}
+\usepackage{pifont}
+\renewcommand\thefootnote{\ding{\numexpr171+\value{footnote}}}
+\begin{document}
+
+\newcommand{\cor}[1]{\textcolor{red}{\textit{#1}}}
+\maketitle
+\cleardoublepage
+\pagestyle{myheadings}
+\markboth{Markus Vieth,  David Klopp, Christian Stricker}{Markus Vieth, David Klopp, Christian Stricker}
+
+\newpage
+
+\section*{Nr.1}
+\begin{align*}
+ MSE( g_T(x_0) ) &= Var(g_T(x_0)) + Bias(f(x_0)) \\
+ &= \mathbb{E_T}\left[ \left( g_T(x_0) - \mathbb{E_T}( g_T(x_0) ) \right)^2 \right] + \left( \mathbb{E_T}(g_T(x_0)) - f(x_0) \right)^2\\
+ &= \mathbb{E_T}\left[ \left( g_T(x_0) - \mathbb{E_T}( g_T(x_0) ) \right)^2 \right] + 2\underset{=\mathbb{E_T}(g_T(x_0)) - \mathbb{E_T}(g_T(x_0)) = 0}{\underbrace{\mathbb{E_T}\left( g_T(x_0) - \mathbb{E_T}(g_T(x_0)) \right)}}\left( \mathbb{E_T}(g_T(x_0)) - f(x_0) \right) \\
+ &+ \left( \mathbb{E_T}(g_T(x_0)) - f(x_0) \right)^2\\
+ &= \mathbb{E_T}\left[ \left( g_T(x_0) - \mathbb{E_T}( g_T(x_0) ) \right)^2 \right] + 2\mathbb{E_T}\left[\left( g_T(x_0) - \mathbb{E_T}(g_T(x_0)) \right)\overset{\footnotemark}{\overbrace{\left( \mathbb{E_T}(g_T(x_0)) - f(x_0) \right)}}\right] \\
+ &+ \mathbb{E_T}\left[\overset{\footnotemark}{\overbrace{\left( \mathbb{E_T}(g_T(x_0)) - f(x_0) \right)^2}}\right]\\ 
+  &= \mathbb{E_T}\left[ \left( g_T(x_0) - \mathbb{E_T}( g_T(x_0) ) \right)^2  + 2\left(\left( g_T(x_0) - \mathbb{E_T}(g_T(x_0)) \right)\left( \mathbb{E_T}(g_T(x_0)) - f(x_0) \right)\right)\right . \\
+  &\left .+ \left( \mathbb{E_T}(g_T(x_0)) - f(x_0) \right)^2\right]\\
+  &= \mathbb{E_T}\left[ \left(\left( g_T(x_0) - \mathbb{E_T}( g_T(x_0) ) \right) + \mathbb{E_T}(g_T(x_0)) - f(x_0)\right)^2 \right]\\
+  &= \mathbb{E_T}\left[ \left( g_T(x_0) - f(x_0) \right)^2 \right]
+\end{align*}
+\begin{flushright}
+	q.e.d.
+\end{flushright}
+\addtocounter{footnote}{-1}
+\footnotetext{Konstant, kann also in den Erwartungswert gesetzt werden}
+\stepcounter{footnote}
+\footnotetext{Konstant, somit ist der Erwartungswert er selbst}
+\end{document}
