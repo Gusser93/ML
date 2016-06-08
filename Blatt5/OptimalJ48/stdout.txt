@@ -1,0 +1,7 @@
+\begin{tabular}{|c|c|c|}
+\hline
+name & accuracy & parameter \\ \hline \hline
+autos & 0.8165853658536584 & -C, 0.14444444444444446, -M, 2 \\ \hline
+car & 0.9314236111111109 & -C, 0.32222222222222224, -M, 2 \\ \hline
+vehicle & 0.7290780141843971 & -C, 0.1, -M, 2 \\ \hline
+\end{tabular}
