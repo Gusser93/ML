@@ -1,0 +1,37 @@
+Naive Bayes
+
+The overall goal of the exercise is to get hands-on experience with the implementation of a popular machine learning scheme and to work on a real-world task.  The task is to implement an improved version of the Naive Bayes algorithm that is able to predict the domain - one of Archaea, Bacteria, Eukaryota or Virus - from the abstract of research papers about proteins taken from the MEDLINE database. You will then apply your implementation on a test set without class labels and hand in the predictions of your implementation.  The team, which manages to predict the largest fraction of test examples correctly, wins the Machine Learning JGU Cup for fame, fortune and glory.
+
+You may look at WEKA code for inspiration, but do not copy or use code from the WEKA workbench.  
+Data Set
+
+In this programming project you will apply the Naive Bayes classifier on a data set containing the abstracts of research papers that deal
+with proteins. Each protein is found either in Archaea, Bacteria, Eukaryota, or Viri. The first character in each record specifies the domain of the protein, as given in the following table. 
+
+
+Code 	Domain
+A 	Archae
+B 	Bacteria
+C	Eucaryota
+D 	Virus
+
+The second attribute in the record is a character string containing the abstract to be classified. The string is preprocessed: it contains only whitespace, alphanumerical lowercase characters, digits, the dash (--) and the prime ('). Each contiguous sequence of non-whitespace characters framed by whitespace is considered a word.
+
+The archive contains two files: trg.txt contains 4000 training examples with class label. tst.txt contains 1000 test examples without class label. To solve the task, you need to learn a classifier only on the training data and then hand in your predictions on the test data.
+
+Challenge
+
+The ultimate goal of this programming project is to come up with an implementation of a (possibly extended or modified) Naive Bayes algorithm, that achieves a high predictive accuracy on the test data. As a minimum requirement your implementation should be better than a vanilla-plain version of Naive Bayes as explained in a standard textbook. Your algorithm should still be Naive Bayes in the sense that it makes the assumption that all attributes are conditionally independent of each other given the class. You might, however, change any other assumptions, representations or models in your implementation. Basically, there are two parts to be solved: 
+
+
+    First of all, you need to decide about a suitable representation for the text in the abstract. An easy way to obtain an attribute-value representation is to identify the 1000 most frequently occurring words and generate 0-1 attributes stating whether or not the word occurs in the corresponding example. There are other possible representations, e.g. one could take the occurrence frequency of a word in the abstract into account.
+    The standard Naive Bayes algorithm as outlined in Mitchell's Machine Learning will probably yield comparably poor predictive  accuracy, so you need to improve it in order to obtain good predictive accuracy. There has been some research on improving Naive Bayes for text classification and you might want to read two particular helpful research papers about the topic (provided online).
+
+Of course, you are also welcome to come up with your own improvements, so feel free to be creative. Either way, please specify in your source code or a separate text file, which kind of improvement you implemented, and your rationale for doing so. 
+Results
+
+Please hand in:
+
+    All the Java code you wrote (One should be able to compile your code using either the javac compiler or maven without the need for any other special tools or environments.)
+    Your predictions for the test set (Your prediction should be stored in a plain ASCII text file containing one line per test example. Each line should contain the character A, B, E, or V, depending on your prediction for the corresponding test example.)
+    A short text file explaining the design details of your implementation.  
