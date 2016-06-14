@@ -10,10 +10,9 @@ public class DomainNaiveBayes implements Classifier, Cloneable, Serializable {
 
 	private Set<String> vocabulary = new HashSet<String>();
 	private Map<String, Double> p_v = new HashMap<String, Double>();
-	//private List<Double> p_w_v = new ArrayList<Double>();
 	private Map<Map.Entry, Double> p_w_v = new HashMap<Map.Entry, Double>();
 	private Collection<String> v_js = new ArrayList<String>();
-
+	private HashMap<String, Double> distribution = new HashMap<String, Double>();
 
 	//------------------------------------------------------------
 	//----------------------- Inner Tuple class ------------------
@@ -135,6 +134,12 @@ public class DomainNaiveBayes implements Classifier, Cloneable, Serializable {
 		return null;
 	}
 
+	/**
+	 *
+	 * @param data
+	 * @param attr
+     * @return
+     */
 	private static int getIndexForAttribute(Instances data, Attribute attr) {
 		return data.getInstances().indexOf(attr);
 	}
@@ -143,6 +148,10 @@ public class DomainNaiveBayes implements Classifier, Cloneable, Serializable {
 	//------------------------- Classifier -----------------------
 	//------------------------------------------------------------
 
+	/**
+	 *
+	 * @param data
+     */
 	public void buildClassifier(Instances data) {
 		// get first non class attribute
 		Attribute notClassAttr = notClassAttr(data);
@@ -199,7 +208,12 @@ public class DomainNaiveBayes implements Classifier, Cloneable, Serializable {
 			e.printStackTrace();
 		}
 	}
-	
+
+	/**
+	 *
+	 * @param instance
+	 * @return
+     */
 	public String classifyInstance(Instance instance) {
 		Instances data = instance.dataset();
 		Attribute attr =  notClassAttr(data);
@@ -223,11 +237,14 @@ public class DomainNaiveBayes implements Classifier, Cloneable, Serializable {
 		double argmax = Double.NEGATIVE_INFINITY;
 		String vNB = null;
 
+
 		for (String v_j : this.v_js) {
 			double result = p_v.get(v_j);
 			for (String a : words) {
 				result *= p_w_v.get(new Tuple<>(words, v_j));
 			}
+
+			this.distribution.put(v_j, result);
 
 			if (result > argmax) {
 				argmax = result;
@@ -237,9 +254,15 @@ public class DomainNaiveBayes implements Classifier, Cloneable, Serializable {
 
 		return vNB;
 	}
-	
-	public double[] distributionForInstace(Instance instance){
-		return null;
+
+	/**
+	 *
+	 * @param instance
+	 * @return
+     */
+	public HashMap<String, Double> distributionForInstace(Instance instance){
+		this.classifyInstance(instance);
+		return this.distribution;
 	}
 	
 	public Capabilities getCapabilities(){
