@@ -39,6 +39,15 @@ public class Attribute {
 			this.values.put(size++, value);
 		}
 	}
+
+	protected int getIndex(String value) {
+		for (Map.Entry entry : this.values.entrySet()) {
+			if (entry.getValue().equals(value)) {
+				return (Integer)entry.getKey();
+			}
+		}
+		return -1;
+	}
 	
 	protected String getString(int index) {
 		return values.get(index);

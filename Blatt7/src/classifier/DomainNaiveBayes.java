@@ -141,7 +141,7 @@ public class DomainNaiveBayes implements Classifier, Cloneable, Serializable {
      * @return
      */
 	private static int getIndexForAttribute(Instances data, Attribute attr) {
-		return data.getInstances().indexOf(attr);
+		return data.getAttributes().indexOf(attr);
 	}
 
 	//------------------------------------------------------------
@@ -264,8 +264,16 @@ public class DomainNaiveBayes implements Classifier, Cloneable, Serializable {
 		this.classifyInstance(instance);
 		return this.distribution;
 	}
-	
+
 	public Capabilities getCapabilities(){
 		return null;
+	}
+
+
+	public static void main(String[] args) throws Exception {
+		Instances data = new Instances("trg.txt", "\t");
+		data.setClassIndex(0);
+		DomainNaiveBayes bayes = new DomainNaiveBayes();
+		bayes.buildClassifier(data);
 	}
 }

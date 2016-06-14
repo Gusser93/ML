@@ -95,4 +95,8 @@ public class Instance {
 		}
 		return attribute.getString((int) index);
 	}
+
+	protected void setClassIndex(int index) {
+		this.classIndex = index;
+	}
 }
