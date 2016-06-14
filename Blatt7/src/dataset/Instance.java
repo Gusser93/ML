@@ -49,7 +49,11 @@ public class Instance {
 		
 		this.dataset = null;
 	}
-	
+
+	public Instances dataset() {
+		return this.dataset;
+	}
+
 	public Attribute attribute(int index) {
 		return this.values.get(index).attribute;
 	}
@@ -65,18 +69,25 @@ public class Instance {
 		return classIndex < 0;
 	}
 	
-	double classValue() throws Exception {
+	public double classValue() throws Exception {
 		if (this.classIsMissing()) {
 			throw new Exception("Class index ist not set!");
 		}
 		return value(classIndex);
 	}
-	
+
+	public String classValueString() throws Exception {
+		if (this.classIsMissing()) {
+			throw new Exception("Class index ist not set!");
+		}
+		return this.stringValue(classIndex);
+	}
+
 	double value(int attIndex) {
 		return values.get(attIndex).value;
 	}
 	
-	String stringValue(int attIndex) {
+	public String stringValue(int attIndex) {
 		Attribute attribute = attribute(attIndex);
 		double index = value(attIndex);
 		if (attribute.isType(AttributeType.numeric)) {

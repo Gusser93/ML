@@ -1,9 +1,6 @@
 package dataset;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class Attribute {
 
@@ -11,7 +8,15 @@ public class Attribute {
 	Map<Integer, String> values;
 	AttributeType type;
 	int size;
-	
+
+	public Collection<String> getValues() {
+		return this.values.values();
+	}
+
+	public AttributeType attributeType(){
+		return this.type;
+	}
+
 	protected Attribute(AttributeType type, List<String> values) {
 		size = 0;
 		this.values = new HashMap<Integer, String>();

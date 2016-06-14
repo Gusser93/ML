@@ -10,7 +10,15 @@ public class Instances {
 	List<Instance> instances;
 	
 	List<Attribute> attributes;
-	
+
+	public List<Attribute> getAttributes() {
+		return this.attributes;
+	}
+
+	public List<Instance> getInstances() {
+		return this.instances;
+	}
+
 	public Attribute attribute(int attIndex) {
 		return this.attributes.get(attIndex);
 	}
@@ -26,7 +34,8 @@ public class Instances {
 			while(lineIn.hasNext()) {
 				String value = lineIn.next();
 				if (value.startsWith("\"") && value.endsWith("\"")) {
-					this.attributes.add(new Attribute(AttributeType.string, value));
+					this.attributes.add(new Attribute(AttributeType.string,
+							value.substring(1, value.length()-2)));
 				//} else if (false) {
 					//Nach Test auf Zahl adde numeric usw.
 				} else {

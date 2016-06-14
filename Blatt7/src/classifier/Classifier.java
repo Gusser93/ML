@@ -4,7 +4,7 @@ import dataset.*;
 public interface Classifier {
 	void buildClassifier(Instances data);
 	
-	double classifyInstance(Instance instance);
+	String classifyInstance(Instance instance);
 	
 	double[] distributionForInstace(Instance instance);
 	
