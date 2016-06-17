@@ -1,10 +1,12 @@
 package classifier;
+import dataset.Attribute;
+import dataset.AttributeType;
+import dataset.Instance;
+import dataset.Instances;
+import evaluation.Evaluation;
+
 import java.io.Serializable;
 import java.util.*;
-
-import com.sun.tools.doclint.Entity;
-import com.sun.tools.doclint.HtmlTag;
-import dataset.*;
 
 public class DomainNaiveBayes implements Classifier, Cloneable, Serializable {
 
@@ -13,6 +15,45 @@ public class DomainNaiveBayes implements Classifier, Cloneable, Serializable {
 	private Map<Map.Entry, Double> p_w_v = new HashMap<Map.Entry, Double>();
 	private Collection<String> v_js = new ArrayList<String>();
 	private HashMap<String, Double> distribution = new HashMap<String, Double>();
+	private final boolean DEBUG_FLAG = true;
+
+	private static final String[] FILTER_LIST = {"this", "is", "in", "the",
+			"of", "with", "been", "they", "an", "as","be", "are", "may",
+			"such", "to", "that", "cannot", "only", "has", "which", "no",
+			"some", "for", "not", "and", "match", "among", "from", "we",
+			"was", "by", "these", "have", "were", "two", "on", "other", "at",
+			"also", "or", "but", "one", "it", "its", "all", "three", "most",
+			"here", "both", "than", "previously", "open", "known", "their",
+			"using", "new", "showed", "more", "those", "found", "into",
+			"many", "high", "different", "several", "within", "single",
+			"there", "used", "important", "each", "well", "number", "large",
+			"first", "four", "suggest", "however", "can", "our", "suggests",
+			"shown", "indicated", "very", "pathogen", "extensive", "evolution", 
+			"had", "contrast", "reveals", "responsible", "indicates", "least", 
+			"contained", "differences", "studies", "required", "total", 
+			"primary", "about", "when", "study", "thus", "product", "products", 
+			"shows", "same", "contain", "through", "detected", "any", "small", 
+			"closely", "five", "could", "during", "complex", "although", 
+			"compared", "unique", "common", "identity", "show", "approximately",
+			"suggesting", "containing", "data", "results", "highly", "report", 
+			"present", "related", "similar", "reading", "between", "contains",
+			"connect", "illustrated", "orderly", "introducing", "directing",
+			"cut", "house", "manners", "sixteen", "built", "going", "publicly",
+			"text", "widest", "informations", "minimally", "childhood", "look",
+			"disrupt", "lose", "theory", "logical", "loose", "turns", "forth",
+			"grew", "receiving", "older", "happened", "game", "electric",
+			"unreported", "scoring", "keeping", "predictive", "familiar",
+			"needs", "triggered", "easily", "manipulation", "unbroken",
+			"suggeste", "similarily", "seek", "joins", "formyl", "ruled",
+			"thin", "know", "deeply", "get", "power", "self", "depended",
+			"recognizes", "success", "sampled", "focus", "delivered", "instant",
+			"beneath", "quantify", "accidentally", "consecutive", "summarized",
+			"combining"
+
+	};
+	private static final Set<String> FILTER = new HashSet<>(Arrays.asList(FILTER_LIST));
+	private static final String FILTER_REGEX = "[A-Za-z][^\\s!.,;:/=@]+";
+	//"[A-Za-z][A-Za-z]+"; //bislang bestes
 
 	//------------------------------------------------------------
 	//----------------------- Inner Tuple class ------------------
@@ -23,7 +64,9 @@ public class DomainNaiveBayes implements Classifier, Cloneable, Serializable {
 	 * @param <K>
 	 * @param <V>
      */
-	private class Tuple<K,V> implements Map.Entry<K,V> {
+	private class Tuple<K extends Comparable,V> implements Map.Entry<K,
+			V>,
+			Comparable<Tuple <? extends K, ?>> {
 		final K key;
 		V value;
 		Tuple<K,V> next;
@@ -58,6 +101,53 @@ public class DomainNaiveBayes implements Classifier, Cloneable, Serializable {
 			}
 			return false;
 		}
+
+		/**
+		 * Compares this object with the specified object for order.  Returns a
+		 * negative integer, zero, or a positive integer as this object is less
+		 * than, equal to, or greater than the specified object.
+		 * <p>
+		 * <p>The implementor must ensure <tt>sgn(x.compareTo(y)) ==
+		 * -sgn(y.compareTo(x))</tt> for all <tt>x</tt> and <tt>y</tt>.  (This
+		 * implies that <tt>x.compareTo(y)</tt> must throw an exception iff
+		 * <tt>y.compareTo(x)</tt> throws an exception.)
+		 * <p>
+		 * <p>The implementor must also ensure that the relation is transitive:
+		 * <tt>(x.compareTo(y)&gt;0 &amp;&amp; y.compareTo(z)&gt;0)</tt> implies
+		 * <tt>x.compareTo(z)&gt;0</tt>.
+		 * <p>
+		 * <p>Finally, the implementor must ensure that <tt>x.compareTo(y)==0</tt>
+		 * implies that <tt>sgn(x.compareTo(z)) == sgn(y.compareTo(z))</tt>, for all
+		 * <tt>z</tt>.
+		 * <p>
+		 * <p>It is strongly recommended, but <i>not</i> strictly required that
+		 * <tt>(x.compareTo(y)==0) == (x.equals(y))</tt>.  Generally speaking, any
+		 * class that implements the <tt>Comparable</tt> interface and violates this
+		 * condition should clearly indicate this fact.  The recommended language is
+		 * "Note: this class has a natural ordering that is inconsistent with
+		 * equals."
+		 * <p>
+		 * <p>In the foregoing description, the notation <tt>sgn(</tt><i>expression</i><tt>)</tt>
+		 * designates the mathematical <i>signum</i> function, which is defined to
+		 * return one of <tt>-1</tt>, <tt>0</tt>, or <tt>1</tt> according to whether
+		 * the value of <i>expression</i> is negative, zero or positive.
+		 *
+		 * @param o
+		 *         the object to be compared.
+		 *
+		 * @return a negative integer, zero, or a positive integer as this object is
+		 * less than, equal to, or greater than the specified object.
+		 *
+		 * @throws NullPointerException
+		 *         if the specified object is null
+		 * @throws ClassCastException
+		 *         if the specified object's type prevents it from being compared to
+		 *         this object.
+		 */
+		@Override
+		public int compareTo(Tuple<? extends K, ?> o) {
+			return this.key.compareTo(o.key);
+		}
 	}
 
 
@@ -71,7 +161,8 @@ public class DomainNaiveBayes implements Classifier, Cloneable, Serializable {
 	private static int count(Object[] arr, Object objc) {
 		int count = 0;
 		for (Object o : arr) {
-			if (arr.equals(objc)) {
+			//o nicht arr, oder?
+			if (o.equals(objc)) {
 				count++;
 			}
 		}
@@ -81,12 +172,26 @@ public class DomainNaiveBayes implements Classifier, Cloneable, Serializable {
 	// get all words inside string
 	private static String[] getWords(String s) {
 		String[] words = s.split("\\s+");
-		for (int i = 0; i<words.length; i++) {
+		Set<String> wordList = new HashSet<>();
+		for (int i = 0; i < words.length; i++) {
 			words[i] = words[i].replaceAll("[^\\w]", "");
 		}
 		return words;
 	}
 
+
+	private static String[] getFilteredWords(String s) {
+		String[] words = s.split("\\s+");
+		Set<String> wordList = new HashSet<>();
+		for (int i = 0; i<words.length; i++) {
+			if (words[i].matches(FILTER_REGEX)) {
+				wordList.add(words[i].replaceAll("[^\\w]", ""));
+			}
+		}
+		wordList.removeAll(FILTER);
+		return wordList.toArray(new String[0]);
+
+	}
 
 	//------------------------------------------------------------
 	//----------------------Classifier helper --------------------
@@ -157,11 +262,15 @@ public class DomainNaiveBayes implements Classifier, Cloneable, Serializable {
 		Attribute notClassAttr = notClassAttr(data);
 		Attribute classAttr = classAttribute(data);
 
+		// TODO delte
+		List<String> DEBUG = new ArrayList<>();
+
 		// get all distinct words
 		int attrIdx = getIndexForAttribute(data, notClassAttr);
 		for (Instance i : data.getInstances()) {
 			// split value to get all distinct words
-			Collections.addAll(vocabulary, getWords(i.stringValue(attrIdx)));
+			Collections.addAll(vocabulary, getFilteredWords(i.stringValue(attrIdx)));
+			Collections.addAll(DEBUG, getFilteredWords(i.stringValue(attrIdx)));
 		}
 
 		// for each target value v_j
@@ -204,6 +313,24 @@ public class DomainNaiveBayes implements Classifier, Cloneable, Serializable {
 					p_w_v.put(new Tuple<String, String>(w_k, v_j), numerator/denominator);
 				}
 			}
+
+
+			if (DEBUG_FLAG) {
+				List<Tuple<Integer, String>> score = new LinkedList<>();
+
+				for (String word : vocabulary) {
+					score.add(new Tuple<Integer, String>
+							(count(DEBUG.toArray(new String[0]), word), word));
+				}
+
+				Collections.sort(score);
+
+				for (Tuple entry : score) {
+					System.out.println(entry.key + " " + entry.value);
+				}
+
+				//System.out.println(this.p_w_v);
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -241,7 +368,7 @@ public class DomainNaiveBayes implements Classifier, Cloneable, Serializable {
 		for (String v_j : this.v_js) {
 			double result = p_v.get(v_j);
 			for (String a : words) {
-				result *= p_w_v.get(new Tuple<>(words, v_j));
+				result *= p_w_v.get(new Tuple<>(a, v_j));
 			}
 
 			this.distribution.put(v_j, result);
@@ -265,6 +392,17 @@ public class DomainNaiveBayes implements Classifier, Cloneable, Serializable {
 		return this.distribution;
 	}
 
+	public Instances classify(Instances data) throws Exception {
+		Instances result = new Instances(data);
+		for (Instance instance : data.getInstances()) {
+			String label = this.classifyInstance(instance);
+			Instance labeled = new Instance(instance, label);
+			result.addInstance(labeled);
+		}
+
+		return result;
+	}
+
 	public Capabilities getCapabilities(){
 		return null;
 	}
@@ -273,7 +411,20 @@ public class DomainNaiveBayes implements Classifier, Cloneable, Serializable {
 	public static void main(String[] args) throws Exception {
 		Instances data = new Instances("trg.txt", "\t");
 		data.setClassIndex(0);
-		DomainNaiveBayes bayes = new DomainNaiveBayes();
-		bayes.buildClassifier(data);
+		Evaluation eval = new Evaluation(data);
+		eval.holdoutEvaluation(1, 0.66, new Random(1), DomainNaiveBayes.class);
+		System.out.println("Accuracy = " + eval.accuracy());
+		/*Instances test = new Instances(data, "tst.txt", "\t");
+		test.print();
+		DomainNaiveBayes c = new DomainNaiveBayes();
+		c.buildClassifier(data);
+		Instances labeled = c.classify(test);
+		labeled.print();*/
 	}
 }
+
+//0.628
+//0.691
+//0.708
+//0.741
+//0.744

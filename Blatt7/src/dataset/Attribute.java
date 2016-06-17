@@ -36,12 +36,18 @@ public class Attribute {
 	
 	protected void addValue(String value) {
 		if (!this.values.containsValue(value)){
+			if(Instances.isString(value)) {
+				value = stripString(value);
+			}
 			this.values.put(size++, value);
 		}
 	}
 
 	protected int getIndex(String value) {
 		for (Map.Entry entry : this.values.entrySet()) {
+			if(Instances.isString(value)) {
+				value = stripString(value);
+			}
 			if (entry.getValue().equals(value)) {
 				return (Integer)entry.getKey();
 			}
@@ -55,5 +61,9 @@ public class Attribute {
 	
 	protected boolean isType(AttributeType type) {
 		return this.type.equals(type);
+	}
+
+	public static String stripString(String value) {
+		return value.substring(1, value.length()-2);
 	}
 }

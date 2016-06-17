@@ -161,6 +161,15 @@ if __name__ == "__main__":
         [46.890]
     ]
 
+    print "inverse"
+    for row in inverse(matrix_multiplication(transpose(X), X)):
+        print row
+
+    print "X * Y"
+    for row in matrix_multiplication(transpose(X), Y):
+        print row
+
+    print "w"
     classifier = Lr_classiier()
     classifier.train(X, Y)
     print classifier.w

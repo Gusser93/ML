@@ -19,6 +19,23 @@ public class Instance {
 	ArrayList<Value> values;
 	int classIndex = -1;
 	Instances dataset;
+
+	public Instance(Instance orig, String classLabel) throws Exception {
+		this.values = new ArrayList<>();
+		this.dataset = orig.dataset();
+		Attribute classAttr = orig.classAttribute();
+		for (int i = 0; i < orig.values.size(); i++) {
+			if (i == orig.classIndex) {
+				values.add(new Value(dataset.attribute(i), classAttr.getIndex
+						(classLabel)));
+			} else {
+				values.add(new Value(dataset.attribute(i), orig.value(i)));
+			}
+		}
+		this.weight = orig.weight;
+
+		this.dataset = orig.dataset();
+	}
 	
 	public Instance(Instances data, double weight, double[] attValues) {
 		this.values = new ArrayList<Value>();
@@ -93,10 +110,22 @@ public class Instance {
 		if (attribute.isType(AttributeType.numeric)) {
 			return Double.toString(index);
 		}
+		if (index < 0) {
+			return "?";
+		}
 		return attribute.getString((int) index);
 	}
 
 	protected void setClassIndex(int index) {
 		this.classIndex = index;
+	}
+
+	public String toString() {
+		StringBuilder result = new StringBuilder();
+		for (int i = 0; i < this.values.size(); i++) {
+			String value = this.stringValue(i);
+			result.append(value + " ");
+		}
+		return result.toString();
 	}
 }

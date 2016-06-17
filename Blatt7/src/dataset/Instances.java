@@ -1,12 +1,8 @@
 package dataset;
 
-import com.sun.tools.javac.util.ArrayUtils;
-
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Scanner;
+import java.util.*;
 
 
 public class Instances {
@@ -30,11 +26,20 @@ public class Instances {
 	}
 
 	public void setClassIndex(int index) {
+		this.classIndex = index;
 		for (Instance i : this.instances) {
 			i.setClassIndex(index);
 		}
 	}
-	public Instances(String csvPath, String delimiter) throws FileNotFoundException {
+
+	public Instances(Instances orig) {
+		this.instances = new ArrayList<>();
+		this.attributes = orig.getAttributes();
+		this.setClassIndex(orig.classIndex);
+	}
+
+	public Instances(String csvPath, String delimiter)
+			throws FileNotFoundException {
 		Scanner input = new Scanner(new File(csvPath));
 		this.instances = new ArrayList<Instance>();
 		this.attributes = new ArrayList<Attribute>();
@@ -45,12 +50,12 @@ public class Instances {
 			List<Double> indices = new ArrayList<>();
 			while(lineIn.hasNext()) {
 				String value = lineIn.next();
-				if (value.startsWith("\"") && value.endsWith("\"")) {
+				if (isString(value)) {
 					this.attributes.add(new Attribute(AttributeType.string,
-							value.substring(1, value.length()-2)));
+							value));
 					indices.add(0.0);
-				//} else if (false) {
-					//Nach Test auf Zahl adde numeric usw.
+					} else if (isNumeric(value)) {
+						//add numeric usw.
 				} else {
 					this.attributes.add(new Attribute(AttributeType.nominal, value));
 					indices.add(0.0);
@@ -64,7 +69,7 @@ public class Instances {
 
 			this.instances.add(new Instance(this, 1, tmp));
 		}
-			
+
 		while (input.hasNextLine()) {
 			String line = input.nextLine();
 			Scanner lineIn = new Scanner(line);
@@ -78,7 +83,111 @@ public class Instances {
 				indices[i] = (double)index;
 			}
 			this.instances.add(new Instance(this, 1, indices));
-			
+
+		}
+
+
+	}
+
+	public Instances(Instances original, String csvPath, String delimiter)
+			throws FileNotFoundException {
+		Scanner input = new Scanner(new File(csvPath));
+		this.instances = new ArrayList<Instance>();
+		this.attributes = original.getAttributes();
+
+		while (input.hasNextLine()) {
+			String line = input.nextLine();
+			Scanner lineIn = new Scanner(line);
+			lineIn.useDelimiter(delimiter);
+			double[] indices = new double[attributes.size()];
+			boolean wasInsertet = true;
+			String value = null;
+			for (int i = 0; i < this.attributes.size(); i++) {
+
+				if (wasInsertet && lineIn.hasNext()) {
+					value = lineIn.next();
+					wasInsertet = this.addValue(i, value, indices);
+				} else if (!wasInsertet){
+					wasInsertet = this.addValue(i, value, indices);
+				} else {
+					indices[i] = -1.0;
+				}
+			}
+			this.instances.add(new Instance(this, 1, indices));
+
+		}
+		this.setClassIndex(original.classIndex);
+	}
+
+	public Instances(Instances origin, double split, Random random) {
+		this.instances = new ArrayList<>();
+		this.attributes = origin.getAttributes();
+
+		List<Instance> shuffle = new ArrayList<>(origin.getInstances());
+		Collections.shuffle(shuffle, random);
+		int border = (int)Math.ceil(shuffle.size() * split);
+
+		for (int i = border - 1; i >= 0; i--) {
+			shuffle.remove(i);
+		}
+
+		this.instances = shuffle;
+		this.setClassIndex(origin.classIndex);
+	}
+
+	/**
+	 * TODO test if header is equal
+	 * @param original
+	 * @param sub
+     */
+	public Instances(Instances original, Instances sub) {
+		this.instances = new ArrayList<>(original.getInstances());
+		this.attributes = original.getAttributes();
+
+		this.instances.removeAll(sub.getInstances());
+		this.setClassIndex(original.classIndex);
+	}
+
+	private boolean addValue(int i, String value, double[] indices) {
+		Attribute temp = attributes.get(i);
+		if ((temp.isType(AttributeType.string) && isString(value)
+		) || (temp.isType(AttributeType.numeric) && isNumeric(value)
+		) || temp.isType(AttributeType.nominal) && !(isNumeric(value) ||
+				isString(value))) {
+			temp.addValue(value);
+			int index = temp.getIndex(value);
+			indices[i] = (double) index;
+			return true;
+		} else {
+			indices[i] = -1.0;
+			return false;
 		}
 	}
+
+	public void addInstance(Instance data) {
+		this.instances.add(data);
+	}
+	public int numInstances() {
+		return this.instances.size();
+	}
+
+	public Instance getInstance(int index) {
+		return this.instances.get(index);
+	}
+
+	public static boolean isNumeric(String value) {
+		return value.matches("-?\\d+([\\.,]\\d+)?");
+	}
+
+	public static boolean isString(String value) {
+		return value.startsWith("\"") && value.endsWith("\"");
+	}
+
+	public void print() {
+		for (Instance instance : this.instances) {
+			System.out.println(instance.toString());
+		}
+	}
+
+
 }
