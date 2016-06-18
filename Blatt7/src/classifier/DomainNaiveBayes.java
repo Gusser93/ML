@@ -48,7 +48,32 @@ public class DomainNaiveBayes implements Classifier, Cloneable, Serializable {
 			"thin", "know", "deeply", "get", "power", "self", "depended",
 			"recognizes", "success", "sampled", "focus", "delivered", "instant",
 			"beneath", "quantify", "accidentally", "consecutive", "summarized",
-			"combining"
+			"combining", "so", "control", "caused", "higher", "divergence",
+			"repeats", "ability", "apparent", "multiple", "further",
+			"development", "composed", "relative", "production", "components",
+			"together", "transcriptional", "regulation", "demonstrated",
+			"against", "designated", "additional", "six", "obtained", "degree",
+			"distribution", "causes", "insertion", "factor", "consistent",
+			"similarities", "translation", "variety", "entire", "whereas",
+			"include", "after", "unknown", "second", "while", "length", "long",
+			"assigned", "group", "sites", "either", "specific", "set",
+			"northern", "subunits", "diverse", "model", "content", "part",
+			"described", "ii", "growth", "members", "various", "likely",
+			"identify", "low", "essential", "analysis", "identified",
+			"complete", "determined", "predicted", "revealed", "including",
+			"similarity", "potential", "major", "characterized", "identical",
+			"located", "functional", "role", "corresponding", "reported",
+			"order", "organization", "analyses", "indicate", "addition",
+			"evidence", "factors", "consists", "member", "mass", "cause",
+			"appears", "close", "over", "possible", "position", "largest",
+			"recently", "appear", "range", "available", "mechanism",
+			"probably", "information", "suggested", "represents", "whole",
+			"active", "end", "early", "origin", "identification",
+			"consensus", "therefore", "iii", "iv", "vi", "vii", "viii",
+			"far", "third", "database", "horizontal", "experiments",
+			"overall", "deletion", "typical", "strong", "majority", "whose",
+			"eight", "use", "increased", "understanding", "provide",
+			"provides", "methods", "databases", "finding", "forms", "completely"
 
 	};
 	private static final Set<String> FILTER = new HashSet<>(Arrays.asList(FILTER_LIST));
@@ -428,3 +453,4 @@ public class DomainNaiveBayes implements Classifier, Cloneable, Serializable {
 //0.708
 //0.741
 //0.744
+//0.771
