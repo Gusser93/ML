@@ -18,6 +18,13 @@ public class DomainNaiveBayes implements Classifier, Cloneable, Serializable {
 	private HashMap<String, Double> distribution = new HashMap<String, Double>();
 	private final boolean DEBUG_FLAG = true;
 
+
+	// TODO zeige klassen verteilung für wörter statt anzahl
+	private static final String[] EXPERIMENTAL_FILTER = {
+			/*"sequence", "genes", "protein", "gene", "sequences", "proteins",
+			"acid", "sequenced", "amino", "genome", "dna", "region",
+			"encoding", "cdna"*/
+	};
 	private static final String[] FILTER_LIST = {"this", "is", "in", "the",
 			"of", "with", "been", "they", "an", "as","be", "are", "may",
 			"such", "to", "that", "cannot", "only", "has", "which", "no",
@@ -90,7 +97,11 @@ public class DomainNaiveBayes implements Classifier, Cloneable, Serializable {
 			"feature", "amounts", "functionally", "presented", "published",
 			"unlike", "relatively", "per", "wide", "southern", "missing",
 			"implicated", "resulted", "describe", "result", "response",
-			"direct", "strongly", "size"};
+			"direct", "strongly", "size", "frequent", "currently",
+			"research", "requires", "continues", "points", "plus", "acts",
+			"tests", "unselected", "orders", "distant", "lesser", "nameley",
+			"test", "noted", "conditions", "resulting", "produced",
+			"incldes", "absent", "positions", "represent"};
 
 	private static final String[] MOST_COMMON_ENGLISH_WORDS = {
 			"the", "and", "to", "of", "a", "I", "in", "was", "he", "that", "it",
@@ -242,6 +253,8 @@ public class DomainNaiveBayes implements Classifier, Cloneable, Serializable {
 			Arrays.asList(FILTER_LIST));
 	private static final Set<String> FILTER2 = new HashSet<>(
 			Arrays.asList(MOST_COMMON_ENGLISH_WORDS));
+	private static final Set<String> FILTER3 = new HashSet<>(
+			Arrays.asList(EXPERIMENTAL_FILTER));
 	private static final String FILTER_REGEX = "[A-Za-z][^\\s!.,;:/=@]+";
 	//"[A-Za-z][A-Za-z]+"; //bislang bestes
 
@@ -380,6 +393,7 @@ public class DomainNaiveBayes implements Classifier, Cloneable, Serializable {
 		}
 		wordList.removeAll(FILTER1);
 		wordList.removeAll(FILTER2);
+		wordList.removeAll(FILTER3);
 		return wordList.toArray(new String[0]);
 
 	}
@@ -622,5 +636,6 @@ public class DomainNaiveBayes implements Classifier, Cloneable, Serializable {
 //0.744
 //0.771
 //0.782
-//0.824
+//0.824 MOST COMMON WORDS
 //0.830
+//0.858 EXPERIMENTAL
