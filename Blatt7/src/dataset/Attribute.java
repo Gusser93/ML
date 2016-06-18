@@ -5,9 +5,9 @@ import java.util.*;
 public class Attribute {
 
 	// Index of attribute
-	Map<Integer, String> values;
-	AttributeType type;
-	int size;
+	private Map<Integer, String> values;
+	private AttributeType type;
+	private int size;
 
 	public Collection<String> getValues() {
 		return this.values.values();
@@ -63,7 +63,7 @@ public class Attribute {
 		return this.type.equals(type);
 	}
 
-	public static String stripString(String value) {
+	private static String stripString(String value) {
 		return value.substring(1, value.length()-2);
 	}
 }

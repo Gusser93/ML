@@ -17,14 +17,21 @@ public class Evaluation {
         this.data = data;
     }
 
-    public void holdoutEvaluation(int folds, double split, Random random,
+    public void holdoutEvaluation(int folds, double split,
                                   Class<? extends Classifier> classifierClass) {
         double result = 0.0;
         for (int i = 0; i < folds; i++) {
-            result += holdoutEvaluationAcc(split,random, classifierClass) /
+            result += holdoutEvaluationAcc(split,new Random(),
+                    classifierClass) /
                     folds;
         }
         this.acc = result;
+    }
+
+    public void holdoutEvaluationDEBUG(double split,
+                                  Class<? extends Classifier> classifierClass) {
+        this.acc = holdoutEvaluationAcc(split,new Random(1),
+                classifierClass);
     }
 
     private double holdoutEvaluationAcc(double split, Random random, Class<?

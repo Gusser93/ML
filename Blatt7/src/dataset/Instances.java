@@ -6,12 +6,12 @@ import java.util.*;
 
 
 public class Instances {
-	List<Instance> instances;
+	private List<Instance> instances;
 	
-	List<Attribute> attributes;
+	private List<Attribute> attributes;
 
 
-	public int classIndex = -1;
+	private int classIndex = -1;
 
 	public List<Attribute> getAttributes() {
 		return this.attributes;

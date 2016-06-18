@@ -14,11 +14,11 @@ public class Instance {
 		}
 	}
 	
-	double weight;
+	private double weight;
 
-	ArrayList<Value> values;
-	int classIndex = -1;
-	Instances dataset;
+	private ArrayList<Value> values;
+	private int classIndex = -1;
+	private Instances dataset;
 
 	public Instance(Instance orig, String classLabel) throws Exception {
 		this.values = new ArrayList<>();
@@ -100,7 +100,7 @@ public class Instance {
 		return this.stringValue(classIndex);
 	}
 
-	double value(int attIndex) {
+	public double value(int attIndex) {
 		return values.get(attIndex).value;
 	}
 	
@@ -124,7 +124,8 @@ public class Instance {
 		StringBuilder result = new StringBuilder();
 		for (int i = 0; i < this.values.size(); i++) {
 			String value = this.stringValue(i);
-			result.append(value + " ");
+			result.append(value);
+			result.append(" ");
 		}
 		return result.toString();
 	}
