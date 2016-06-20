@@ -21,31 +21,41 @@
 \newpage
 
 \section*{Nr.1}
-Design a two-input perceptron that implements the boolean function $A \land \neg B$
+Design a two-input perceptron that implements the boolean function $A \land \neg B$\\
+
+\subsection*{1. Allgemein:} \[w_0 + w_1 \cdot x_1 + w_2 \cdot x_2\]
+
+\subsection*{2. Bedingungen:}
+
 \[\text{I.}~w_0 - w_1 - w_2 \leq 0 \]
 \[\text{II.}~w_0 - w_1 + w_2 \leq 0 \]
 \[\text{III.}~w_0 + w_1 - w_2 > 0 \]
 \[\text{VI.}~w_0 + w_1 + w_2 \leq 0 \]
 
-Rechnung:\\
-1. I + VI
+\subsection*{3. Rechnung:}
+
+\subsubsection*{1. I + VI}
 \[2 \cdot w_0 \leq 0 \Leftrightarrow w_0 \leq 0 \]
-2.
+
+\subsubsection*{2.}
 \[\text{I.} \Leftrightarrow w_0 \leq w_1 + w_2\]
 \[\text{III.} \Leftrightarrow w_0 > -w_1 + w_2\]
 \[\Rightarrow -w_1 + w_2 <  w_0 \leq w_1 + w_2\]
 \[\Rightarrow -w_1 + w_2 < w_1 + w_2\]
 \[ \Leftrightarrow w_1 > 0\]
-3. Wähle $w_0 = 0$ und $w_1 = 1$
+
+\subsubsection*{3. Wähle $w_0 = 0$ und $w_1 = 1$}
+
 \[ 0 -1 -w_2 \leq 0\]
 \[ -1 \leq w_2\]
-4. Wähle $w_2 = -1$
+\subsubsection*{4. Wähle $w_2 = -1$}
+
 \[\text{I.}~0 - 1 +1 = 0 \leq 0~~~\checkmark \]
 \[\text{II.}~0 - 1 - 1 = -2 \leq 0~~~\checkmark \]
 \[\text{III.}~0 + 1 +1 = 2 > 0~~~\checkmark \]
 \[\text{VI.}~0 + 1 -1 = 0 \leq 0~~~\checkmark \]
 
-Lösung:
+\subsubsection*{5. Lösung:}
 \[
 \overset{\rightarrow}{w} = \begin{pmatrix}
            0 \\
