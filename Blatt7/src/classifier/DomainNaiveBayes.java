@@ -5,6 +5,8 @@ import dataset.Instance;
 import dataset.Instances;
 import evaluation.Evaluation;
 
+import dataparsing.Stemmer;
+
 import java.io.Serializable;
 import java.util.*;
 
@@ -17,7 +19,7 @@ public class DomainNaiveBayes implements Classifier, Cloneable, Serializable {
 	private Collection<String> v_js = new ArrayList<String>();
 	private HashMap<String, Double> distribution = new HashMap<String, Double>();
 	private final boolean DEBUG_FLAG = true;
-
+	private static final boolean USE_STEMMING = true;
 
 	// TODO zeige klassen verteilung für wörter statt anzahl
 	private static final String[] FILTER_LIST = {"this", "is", "in", "the",
@@ -367,13 +369,28 @@ public class DomainNaiveBayes implements Classifier, Cloneable, Serializable {
 
 
 	 private double score(String[] words, String str) {
-		double score = 0.0;
-		for (Map.Entry<String, Double> v : this.p_v.entrySet()) {
-			double dif = v.getValue() - this.p_w_v.get(new Tuple(str,
-					v.getKey()));
+		 double score = 0.0;
+		 //double test = 0.0;
+		 double p_w = 0.0;
+
+		 for (Map.Entry<String, Double> v : this.p_v.entrySet()) {
+			 double p_w_v = this.p_w_v.get(new Tuple(str, v.getKey()));
+			 double p_v = v.getValue();
+			 p_w += p_w_v * p_v;
+		 }
+
+		 // Wahrscheinlichkeit für v - Wahrscheinlichkeit für v unter w
+		 for (Map.Entry<String, Double> v : this.p_v.entrySet()) {
+			double p_w_v = this.p_w_v.get(new Tuple(str, v.getKey()));
+			double p_v = v.getValue();
+			double p_v_w = (p_w_v * p_v) / p_w;
+			double dif = p_v - p_v_w;
+			//test += p_v_w;
 			score += dif * dif;
-		}
-		return -Math.sqrt(score) * count(words, str);
+		 }
+		 //System.out.println(test);
+		 //ohne count 93%
+		 return -Math.sqrt(score);// * count(words, str);
 	}
 
 	/* private double score(String[] words, String str) {
@@ -383,9 +400,13 @@ public class DomainNaiveBayes implements Classifier, Cloneable, Serializable {
 	// get all words inside string
 	private static String[] getWords(String s) {
 		String[] words = s.split("\\s+");
-		Set<String> wordList = new HashSet<>();
 		for (int i = 0; i < words.length; i++) {
 			words[i] = words[i].replaceAll("[^\\w]", "");
+			// only letters inside the word
+			if (USE_STEMMING && words[i].matches("[a-zA-Z]+")) {
+				// transform our word to the root form
+				words[i] = Stemmer.readString(words[i]).get(0);
+			}
 		}
 		return words;
 	}
@@ -393,10 +414,21 @@ public class DomainNaiveBayes implements Classifier, Cloneable, Serializable {
 
 	private static String[] getFilteredWords(String s) {
 		String[] words = s.split("\\s+");
-		Set<String> wordList = new HashSet<>();
+		//Set<String> wordList = new HashSet<>();
+		List<String> wordList = new ArrayList<>();
 		for (int i = 0; i < words.length; i++) {
 			if (words[i].matches(FILTER_REGEX)) {
-				wordList.add(words[i].replaceAll("[^\\w]", ""));
+				words[i] = words[i].replaceAll("[^\\w]", "");
+				// if only letters inside the word
+				if (USE_STEMMING && words[i].matches("[a-zA-Z]+")) {
+					// transform our word to the root form
+					String temp = Stemmer.readString(words[i]).get(0);
+					// Soll verhindern, dass Wörter wie "ha" rauskommen
+					if (temp.length() > 5) {
+						words[i] = temp;
+					}
+				}
+				wordList.add(words[i]);
 			}
 		}
 		wordList.removeAll(FILTER1);
@@ -535,7 +567,6 @@ public class DomainNaiveBayes implements Classifier, Cloneable, Serializable {
 
 			List<Tuple<Double, String>> score = new LinkedList<>();
 
-
 			for (String word : vocabulary) {
 				/*score.add(new Tuple<Integer, String>
 						(count(DEBUG.toArray(new String[0]), word), word));*/
@@ -627,7 +658,6 @@ public class DomainNaiveBayes implements Classifier, Cloneable, Serializable {
 			Instance labeled = new Instance(instance, label);
 			result.addInstance(labeled);
 		}
-
 		return result;
 	}
 
@@ -650,3 +680,18 @@ public class DomainNaiveBayes implements Classifier, Cloneable, Serializable {
 		labeled.print();*/
 	}
 }
+
+// SCROE = 1000
+
+//0.89 NO STEMMING
+//0.88 STEMMING
+//0.88 STEMMING
+
+// SCROE = 500
+// 0.87 STEMMING
+
+//SCORE = 800
+// 0.879 STEMMING
+
+//SCORE = 1500
+// 0.87 STEMMING
