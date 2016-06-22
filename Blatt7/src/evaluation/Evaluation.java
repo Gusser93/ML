@@ -47,8 +47,7 @@ public class Evaluation {
             int n = test.numInstances();
 
             for (int i = 0; i < n; i++) {
-                String label = classifier.classifyInstance(test.getInstance
-                        (i));
+                String label = classifier.classifyInstance(test.getInstance(i));
                 String should = test.getInstance(i).classValueString();
                 //System.out.println("Predicted: " + label + " should " +
                         //should);
