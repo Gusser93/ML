@@ -5,6 +5,8 @@ import dataset.Instance;
 import dataset.Instances;
 import evaluation.Evaluation;
 
+import dataparsing.Stemmer;
+
 import java.io.Serializable;
 import java.util.*;
 
@@ -17,6 +19,7 @@ public class DomainNaiveBayes implements Classifier, Cloneable, Serializable {
 	private Collection<String> v_js = new ArrayList<String>();
 	private HashMap<String, Double> distribution = new HashMap<String, Double>();
 	private final boolean DEBUG_FLAG = true;
+	private static final boolean USE_STEMMING = true;
 
 
 	// TODO zeige klassen verteilung für wörter statt anzahl
@@ -375,9 +378,13 @@ public class DomainNaiveBayes implements Classifier, Cloneable, Serializable {
 	// get all words inside string
 	private static String[] getWords(String s) {
 		String[] words = s.split("\\s+");
-		Set<String> wordList = new HashSet<>();
 		for (int i = 0; i < words.length; i++) {
 			words[i] = words[i].replaceAll("[^\\w]", "");
+			// only letters inside the word
+			if (USE_STEMMING && words[i].matches("[a-zA-Z]+")) {
+				// transform our word to the root form
+				words[i] = Stemmer.readString(words[i]).get(0);
+			}
 		}
 		return words;
 	}
@@ -388,12 +395,19 @@ public class DomainNaiveBayes implements Classifier, Cloneable, Serializable {
 		Set<String> wordList = new HashSet<>();
 		for (int i = 0; i < words.length; i++) {
 			if (words[i].matches(FILTER_REGEX)) {
-				wordList.add(words[i].replaceAll("[^\\w]", ""));
+				words[i] = words[i].replaceAll("[^\\w]", "");
+				// if only letters inside the word
+				if (USE_STEMMING && words[i].matches("[a-zA-Z]+")) {
+					// transform our word to the root form
+					words[i] = Stemmer.readString(words[i]).get(0);
+				}
+				wordList.add(words[i]);
 			}
 		}
 		wordList.removeAll(FILTER1);
 		wordList.removeAll(FILTER2);
 		wordList.removeAll(FILTER3);
+
 		return wordList.toArray(new String[0]);
 
 	}
@@ -521,15 +535,22 @@ public class DomainNaiveBayes implements Classifier, Cloneable, Serializable {
 			}
 
 
+			List<Tuple<Integer, String>> score = new LinkedList<>();
+
+			for (String word : vocabulary) {
+				score.add(new Tuple<Integer, String>
+						(-count(DEBUG.toArray(), word), word));
+			}
+
+			Collections.sort(score);
+			score = score.subList(0, 1000);
+
+			this.vocabulary = new HashSet<>();
+			for (Map.Entry<Integer, String> e : score) {
+				vocabulary.add(e.getValue());
+			}
+
 			if (DEBUG_FLAG) {
-				List<Tuple<Integer, String>> score = new LinkedList<>();
-
-				for (String word : vocabulary) {
-					score.add(new Tuple<Integer, String>
-							(count(DEBUG.toArray(new String[0]), word), word));
-				}
-
-				Collections.sort(score);
 
 				for (Tuple<Integer, String> entry : score) {
 					System.out.println(entry.key + " " + entry.value);
@@ -605,7 +626,6 @@ public class DomainNaiveBayes implements Classifier, Cloneable, Serializable {
 			Instance labeled = new Instance(instance, label);
 			result.addInstance(labeled);
 		}
-
 		return result;
 	}
 
@@ -629,13 +649,17 @@ public class DomainNaiveBayes implements Classifier, Cloneable, Serializable {
 	}
 }
 
-//0.628
-//0.691
-//0.708
-//0.741
-//0.744
-//0.771
-//0.782
-//0.824 MOST COMMON WORDS
-//0.830
-//0.858 EXPERIMENTAL
+// SCROE = 1000
+
+//0.89 NO STEMMING
+//0.88 STEMMING
+//0.88 STEMMING
+
+// SCROE = 500
+// 0.87 STEMMING
+
+//SCORE = 800
+// 0.879 STEMMING
+
+//SCORE = 1500
+// 0.87 STEMMING

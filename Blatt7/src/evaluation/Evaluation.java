@@ -44,7 +44,7 @@ public class Evaluation {
             Classifier classifier = classifierClass.newInstance();
             classifier.buildClassifier(train);
             int count = 0;
-            int n = train.numInstances();
+            int n = test.numInstances();
 
             for (int i = 0; i < n; i++) {
                 String label = classifier.classifyInstance(test.getInstance
