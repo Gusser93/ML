@@ -20,11 +20,6 @@ public class DomainNaiveBayes implements Classifier, Cloneable, Serializable {
 
 
 	// TODO zeige klassen verteilung für wörter statt anzahl
-	private static final String[] EXPERIMENTAL_FILTER = {
-			/*"sequence", "genes", "protein", "gene", "sequences", "proteins",
-			"acid", "sequenced", "amino", "genome", "dna", "region",
-			"encoding", "cdna"*/
-	};
 	private static final String[] FILTER_LIST = {"this", "is", "in", "the",
 			"of", "with", "been", "they", "an", "as","be", "are", "may",
 			"such", "to", "that", "cannot", "only", "has", "which", "no",
@@ -253,8 +248,6 @@ public class DomainNaiveBayes implements Classifier, Cloneable, Serializable {
 			Arrays.asList(FILTER_LIST));
 	private static final Set<String> FILTER2 = new HashSet<>(
 			Arrays.asList(MOST_COMMON_ENGLISH_WORDS));
-	private static final Set<String> FILTER3 = new HashSet<>(
-			Arrays.asList(EXPERIMENTAL_FILTER));
 	private static final String FILTER_REGEX = "[A-Za-z][^\\s!.,;:/=@]+";
 	//"[A-Za-z][A-Za-z]+"; //bislang bestes
 
@@ -372,6 +365,21 @@ public class DomainNaiveBayes implements Classifier, Cloneable, Serializable {
 		return count;
 	}
 
+
+	 private double score(String[] words, String str) {
+		double score = 0.0;
+		for (Map.Entry<String, Double> v : this.p_v.entrySet()) {
+			double dif = v.getValue() - this.p_w_v.get(new Tuple(str,
+					v.getKey()));
+			score += dif * dif;
+		}
+		return -Math.sqrt(score) * count(words, str);
+	}
+
+	/* private double score(String[] words, String str) {
+		return -count(words, str);
+	} */
+
 	// get all words inside string
 	private static String[] getWords(String s) {
 		String[] words = s.split("\\s+");
@@ -393,7 +401,11 @@ public class DomainNaiveBayes implements Classifier, Cloneable, Serializable {
 		}
 		wordList.removeAll(FILTER1);
 		wordList.removeAll(FILTER2);
-		wordList.removeAll(FILTER3);
+		for (String str : wordList) {
+			if (str.length() < 1) {
+				System.out.println(str);
+			}
+		}
 		return wordList.toArray(new String[0]);
 
 	}
@@ -474,8 +486,9 @@ public class DomainNaiveBayes implements Classifier, Cloneable, Serializable {
 		int attrIdx = getIndexForAttribute(data, notClassAttr);
 		for (Instance i : data.getInstances()) {
 			// split value to get all distinct words
-			Collections.addAll(vocabulary, getFilteredWords(i.stringValue(attrIdx)));
-			Collections.addAll(DEBUG, getFilteredWords(i.stringValue(attrIdx)));
+			String[] filteredWords = getFilteredWords(i.stringValue(attrIdx));
+			Collections.addAll(vocabulary, filteredWords);
+			Collections.addAll(DEBUG, filteredWords);
 		}
 
 		// for each target value v_j
@@ -520,18 +533,27 @@ public class DomainNaiveBayes implements Classifier, Cloneable, Serializable {
 				}
 			}
 
+			List<Tuple<Double, String>> score = new LinkedList<>();
+
+
+			for (String word : vocabulary) {
+				/*score.add(new Tuple<Integer, String>
+						(count(DEBUG.toArray(new String[0]), word), word));*/
+				score.add(new Tuple<Double, String>(score(DEBUG.toArray(new
+						String[0]), word), word));
+			}
+
+			Collections.sort(score);
+			//Collections.reverse(score);
+			score = score.subList(0, 1000);
+			this.vocabulary = new HashSet<>();
+			for (Tuple<? extends Number, String> t : score) {
+				vocabulary.add(t.getValue());
+			}
 
 			if (DEBUG_FLAG) {
-				List<Tuple<Integer, String>> score = new LinkedList<>();
 
-				for (String word : vocabulary) {
-					score.add(new Tuple<Integer, String>
-							(count(DEBUG.toArray(new String[0]), word), word));
-				}
-
-				Collections.sort(score);
-
-				for (Tuple<Integer, String> entry : score) {
+				for (Tuple<? extends Number, String> entry : score) {
 					System.out.println(entry.key + " " + entry.value);
 				}
 
@@ -618,7 +640,7 @@ public class DomainNaiveBayes implements Classifier, Cloneable, Serializable {
 		Instances data = new Instances("trg.txt", "\t");
 		data.setClassIndex(0);
 		Evaluation eval = new Evaluation(data);
-		eval.holdoutEvaluationDEBUG(0.66, DomainNaiveBayes.class);
+		eval.holdoutEvaluationDEBUG(0.33, DomainNaiveBayes.class);
 		System.out.println("Accuracy = " + eval.accuracy());
 		/*Instances test = new Instances(data, "tst.txt", "\t");
 		test.print();
@@ -628,14 +650,3 @@ public class DomainNaiveBayes implements Classifier, Cloneable, Serializable {
 		labeled.print();*/
 	}
 }
-
-//0.628
-//0.691
-//0.708
-//0.741
-//0.744
-//0.771
-//0.782
-//0.824 MOST COMMON WORDS
-//0.830
-//0.858 EXPERIMENTAL

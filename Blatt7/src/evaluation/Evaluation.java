@@ -46,11 +46,13 @@ public class Evaluation {
             int count = 0;
             int n = test.numInstances();
 
+            System.out.println("Test: " + n + "\nTrain: " + train.numInstances());
+
             for (int i = 0; i < n; i++) {
                 String label = classifier.classifyInstance(test.getInstance(i));
                 String should = test.getInstance(i).classValueString();
-                //System.out.println("Predicted: " + label + " should " +
-                        //should);
+                /*System.out.println("Predicted: " + label + " should " +
+                        should);*/
                 if (should.equals(label)) {
                     count++;
                 }
