@@ -1,3 +1,31 @@
+/*
+Test results:
+
+-----------------------------------------
+| SCORE     | STEMMING         | TIME   |
+=========================================
+|   500     |    true          |  0.87  |
+|   500     |    false         |  0.87  |
+-----------------------------------------
+|  1000     |    true          |  0.89  |
+|  1000     |    false         |  0.902 |
+-----------------------------------------
+|  2000     |    true          |  0.88  |
+|  2000     |    false         |  0.911 |
+-----------------------------------------
+|  2500     |    true          |  0.88  |
+|  2500     |  false           | 0.914  |
+-----------------------------------------
+|  3000     |    true          |  0.87  |
+|  3000     |    false         |  0.912 |
+-----------------------------------------
+|  5000     |    true          |  0.84  |
+|  5000     |    false         |  0.89  |
+-----------------------------------------
+*/
+
+
+
 package classifier;
 import dataparsing.Stemmer;
 import dataset.Attribute;
@@ -8,18 +36,21 @@ import evaluation.Evaluation;
 
 import java.io.Serializable;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.DoubleStream;
 
 public class DomainNaiveBayes implements Classifier, Cloneable, Serializable {
 
 	private Set<String> vocabulary = new HashSet<String>();
-	private Map<String, Double> p_v = new HashMap<String, Double>();
+	private Map<String, Double> p_v = new ConcurrentHashMap<String, Double>();
 	private Map<Map.Entry<String, String>, Double> p_w_v =
-			new HashMap<Map.Entry<String, String>, Double>();
+			new ConcurrentHashMap<Map.Entry<String, String>, Double>();
+	private Map<Map.Entry<String, String>, Double> d_i_j =
+			new ConcurrentHashMap<Map.Entry<String, String>, Double>();
 	private Collection<String> v_js = new ArrayList<String>();
 	private HashMap<String, Double> distribution = new HashMap<String, Double>();
-	private final boolean DEBUG_FLAG = true;
-	private static final boolean USE_STEMMING = true;
-	private final int SCORE = 1000;
+	private static final boolean USE_STEMMING = false;
+	private final int SCORE = 2500;
 
 	// TODO zeige klassen verteilung für wörter statt anzahl
 	private static final String[] FILTER_LIST = {"this", "is", "in", "the",
@@ -300,48 +331,7 @@ public class DomainNaiveBayes implements Classifier, Cloneable, Serializable {
 			return false;
 		}
 
-		/**
-		 * Compares this object with the specified object for order.  Returns a
-		 * negative integer, zero, or a positive integer as this object is less
-		 * than, equal to, or greater than the specified object.
-		 * <p>
-		 * <p>The implementor must ensure <tt>sgn(x.compareTo(y)) ==
-		 * -sgn(y.compareTo(x))</tt> for all <tt>x</tt> and <tt>y</tt>.  (This
-		 * implies that <tt>x.compareTo(y)</tt> must throw an exception iff
-		 * <tt>y.compareTo(x)</tt> throws an exception.)
-		 * <p>
-		 * <p>The implementor must also ensure that the relation is transitive:
-		 * <tt>(x.compareTo(y)&gt;0 &amp;&amp; y.compareTo(z)&gt;0)</tt> implies
-		 * <tt>x.compareTo(z)&gt;0</tt>.
-		 * <p>
-		 * <p>Finally, the implementor must ensure that <tt>x.compareTo(y)==0</tt>
-		 * implies that <tt>sgn(x.compareTo(z)) == sgn(y.compareTo(z))</tt>, for all
-		 * <tt>z</tt>.
-		 * <p>
-		 * <p>It is strongly recommended, but <i>not</i> strictly required that
-		 * <tt>(x.compareTo(y)==0) == (x.equals(y))</tt>.  Generally speaking, any
-		 * class that implements the <tt>Comparable</tt> interface and violates this
-		 * condition should clearly indicate this fact.  The recommended language is
-		 * "Note: this class has a natural ordering that is inconsistent with
-		 * equals."
-		 * <p>
-		 * <p>In the foregoing description, the notation <tt>sgn(</tt><i>expression</i><tt>)</tt>
-		 * designates the mathematical <i>signum</i> function, which is defined to
-		 * return one of <tt>-1</tt>, <tt>0</tt>, or <tt>1</tt> according to whether
-		 * the value of <i>expression</i> is negative, zero or positive.
-		 *
-		 * @param o
-		 *         the object to be compared.
-		 *
-		 * @return a negative integer, zero, or a positive integer as this object is
-		 * less than, equal to, or greater than the specified object.
-		 *
-		 * @throws NullPointerException
-		 *         if the specified object is null
-		 * @throws ClassCastException
-		 *         if the specified object's type prevents it from being compared to
-		 *         this object.
-		 */
+
 		@Override
 		public int compareTo(Tuple<? extends K, ?> o) {
 			return this.key.compareTo(o.key);
@@ -351,23 +341,11 @@ public class DomainNaiveBayes implements Classifier, Cloneable, Serializable {
 
 
 	//------------------------------------------------------------
-	//----------------------- general helper ---------------------
+	//--------------------------- Score --------------------------
 	//------------------------------------------------------------
 
 
-	// count how often an element occurs inside the array
-	private static int count(Object[] arr, Object objc) {
-		int count = 0;
-		for (Object o : arr) {
-			//o nicht arr, oder?
-			if (o.equals(objc)) {
-				count++;
-			}
-		}
-		return count;
-	}
-
-/*
+	/*
 	private double score(String[] words, String str) {
 		double score = 0.0;
 		//double test = 0.0;
@@ -394,6 +372,12 @@ public class DomainNaiveBayes implements Classifier, Cloneable, Serializable {
 	} */
 
 
+	/**
+	 *
+	 * @param words
+	 * @param str
+     * @return
+     */
 	private double score(String[] words, String str) {
 		double score = 0.0;
 		double p_w = 0.0;
@@ -422,7 +406,34 @@ public class DomainNaiveBayes implements Classifier, Cloneable, Serializable {
 		return -count(words, str);
 	} */
 
-	// get all words inside string
+
+	//------------------------------------------------------------
+	//----------------------- Word processing --------------------
+	//------------------------------------------------------------
+
+	/**
+	 * count how often an element occurs inside the array
+	 * @param arr
+	 * @param objc
+     * @return
+     */
+	private static int count(Object[] arr, Object objc) {
+		int count = 0;
+		for (Object o : arr) {
+			//o nicht arr, oder?
+			if (o.equals(objc)) {
+				count++;
+			}
+		}
+		return count;
+	}
+
+
+	/**
+	 * get all words inside string
+	 * @param s
+	 * @return
+     */
 	private static String[] getWords(String s) {
 		String[] words = s.split("\\s+");
 		for (int i = 0; i < words.length; i++) {
@@ -430,16 +441,23 @@ public class DomainNaiveBayes implements Classifier, Cloneable, Serializable {
 			// only letters inside the word
 			if (USE_STEMMING && words[i].matches("[a-zA-Z]+")) {
 				// transform our word to the root form
-				words[i] = Stemmer.readString(words[i]).get(0);
+				String temp = Stemmer.readString(words[i]).get(0);
+
+				if (temp.length() > 5) {
+					words[i] = temp;
+				}
 			}
 		}
 		return words;
 	}
 
-
+	/**
+	 *
+	 * @param s
+	 * @return
+     */
 	private static String[] getFilteredWords(String s) {
 		String[] words = s.split("\\s+");
-		//Set<String> wordList = new HashSet<>();
 		List<String> wordList = new ArrayList<>();
 		for (int i = 0; i < words.length; i++) {
 			if (words[i].matches(FILTER_REGEX)) {
@@ -448,7 +466,7 @@ public class DomainNaiveBayes implements Classifier, Cloneable, Serializable {
 				if (USE_STEMMING && words[i].matches("[a-zA-Z]+")) {
 					// transform our word to the root form
 					String temp = Stemmer.readString(words[i]).get(0);
-					// Soll verhindern, dass Wörter wie "ha" rauskommen
+					// prevent words like 'ha'
 					if (temp.length() > 5) {
 						words[i] = temp;
 					}
@@ -524,19 +542,20 @@ public class DomainNaiveBayes implements Classifier, Cloneable, Serializable {
 	}
 
 	private static Tuple<String, List> getDoc(Instances data, String v_j, int
-			attrIdx)
-			throws Exception {
-
+			attrIdx) {
 		// get subset of instances where traget value equals v_j
 		StringBuilder text_j = new StringBuilder();
 		List<Instance> docs_j = new ArrayList<Instance>();
 		for (Instance i : data.getInstances()) {
-			//if (v_j.equals(i.classValueString())) {
-			if (!v_j.equals(i.classValueString())) { //CNF
-				docs_j.add(i);
+			try {
+				if (v_j.equals(i.classValueString())) {
+					docs_j.add(i);
 
-				text_j.append(i.stringValue(attrIdx));
-				text_j.append(" ");
+					text_j.append(i.stringValue(attrIdx));
+					text_j.append(" ");
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
 			}
 		}
 		return new Tuple<String, List>(text_j.toString(), docs_j);
@@ -555,8 +574,6 @@ public class DomainNaiveBayes implements Classifier, Cloneable, Serializable {
 		Attribute notClassAttr = notClassAttr(data);
 		Attribute classAttr = classAttribute(data);
 
-		// TODO delte
-		List<String> DEBUG = new ArrayList<>();
 
 		// get all distinct words
 		int attrIdx = getIndexForAttribute(data, notClassAttr);
@@ -564,7 +581,6 @@ public class DomainNaiveBayes implements Classifier, Cloneable, Serializable {
 			// split value to get all distinct words
 			String[] filteredWords = getFilteredWords(i.stringValue(attrIdx));
 			Collections.addAll(vocabulary, filteredWords);
-			Collections.addAll(DEBUG, filteredWords);
 		}
 
 		// for each target value v_j
@@ -575,51 +591,105 @@ public class DomainNaiveBayes implements Classifier, Cloneable, Serializable {
 				System.err.println("No values for class attribute found");
 				return;
 			}
+
+			// save all threads
+			ArrayList<Thread> threads = new ArrayList<>();
+			final Collection<String> __v_js = this.v_js;
+
+
 			// iterate over values
-			for (String v_j : this.v_js) {
+			for (String v_j : __v_js) {
+				// perform each calculation on its own thread
+				Thread t = new Thread() {
+					public void run() {
 
-				Tuple<String, List> tuple = getDoc(data, v_j, attrIdx);
-				List<String> docs_j= tuple.getValue();
-				// calculate values
-				double exampleSize = (double)data.getInstances().size();
-				double docs_jSize = (double)docs_j.size();
-				p_v.put(v_j, docs_jSize / exampleSize);
+						Tuple<String, List> tuple = getDoc(data, v_j, attrIdx);
+						List<String> docs_j= tuple.getValue();
+						// calculate values
+						double exampleSize = (double)data.getInstances().size();
+						double docs_jSize = (double)docs_j.size();
+						p_v.put(v_j, docs_jSize / exampleSize);
 
-				// count words inside subset
-				String txt = tuple.getKey();
-				String[] words = getWords(txt);
-				int n = words.length;
+						// count words inside subset
+						String txt = tuple.getKey();
+						String[] words = getWords(txt);
+						int n = words.length;
 
-				// iterate over vocabulary
-				for (String w_k : vocabulary) {
-					double n_k = count(words, w_k);
+						ArrayList<Thread> inner_threads = new ArrayList<>();
 
-					//TWCNB
-					n_k = Math.log(n_k + 1);
-					double num =  this.v_js.size();
-					double denum = 0.0;
+						// iterate over vocabulary
+						for (String w_k : vocabulary) {
+							// calculate probabilities inside thread
+							Thread inner_t = new Thread() {
+								public void run() {
+									double n_k = count(words, w_k);
 
-					for (String v_j2 : this.v_js) {
-						List<String> doc = getDoc(data, v_j2, attrIdx)
-								.getValue();
-						if (doc.contains(v_j2)) {
-							denum++;
+									/*//TWCNB
+									n_k = Math.log(n_k + 1);
+									double num =  v_js.size();
+									double denum = 0.0;
+
+									ConcurrentHashMap<String, List<String>>
+											docs = new ConcurrentHashMap<>();
+									for (String v_j2 : v_js) {
+										docs.put(v_j2, getDoc(data,
+												v_j2, attrIdx)
+												.getValue());
+
+									}
+									for (Map.Entry<String, List<String>> e :
+											docs.entrySet()) {
+										List<String> doc = e.getValue();
+										String v_j2 = e.getKey();
+										if (doc.contains(v_j2)) {
+											denum++;
+										}
+									}
+
+									n_k *= Math.log(num / denum);
+									Vector<Double> somethings = new Vector<>();
+									double something = 0.0;
+
+
+									for (String w_k2 : vocabulary) {
+
+										double count = count(words, w_k2);
+										somethings.add(count * count);
+									}
+
+									for (Double d : somethings) {
+										something += d;
+									}
+									n_k /= Math.sqrt(something);
+									*/
+									double numerator = (double)n_k + 1.0d;
+									double denominator = (double)(n + vocabulary.size());
+									p_w_v.put(new Tuple<String, String>(w_k, v_j),
+											numerator / denominator);
+								}
+							};
+							inner_threads.add(inner_t);
+							inner_t.start();
+						}
+
+
+						// join threads
+						try {
+							for (Thread inner_thread : inner_threads) {
+								inner_thread.join();
+							}
+						} catch (Exception e) {
+							e.printStackTrace();
 						}
 					}
-					n_k *= Math.log(num / denum);
-					double something = 0.0;
+				};
+				t.start();
+				threads.add(t);
+			}
 
-					for (String w_k2 : vocabulary) {
-						double count = count(words, w_k2);
-						something += count * count;
-					}
-					n_k /= Math.sqrt(something);
-
-					double numerator = (double)n_k + 1.0d;
-					double denominator = (double)(n + vocabulary.size());
-					p_w_v.put(new Tuple<String, String>(w_k, v_j),
-							numerator / denominator);
-				}
+			// Join our threads
+			for (Thread thread : threads) {
+				thread.join();
 			}
 
 			for (Map.Entry<Map.Entry<String, String>, Double> entry1 : p_w_v
@@ -637,9 +707,7 @@ public class DomainNaiveBayes implements Classifier, Cloneable, Serializable {
 			List<Tuple<Double, String>> score = new LinkedList<>();
 
 			for (String word : vocabulary) {
-				/*score.add(new Tuple<Integer, String>
-						(count(DEBUG.toArray(new String[0]), word), word));*/
-				score.add(new Tuple<Double, String>(score(DEBUG.toArray(new
+				score.add(new Tuple<Double, String>(score(vocabulary.toArray(new
 						String[0]), word), word));
 			}
 
@@ -647,19 +715,12 @@ public class DomainNaiveBayes implements Classifier, Cloneable, Serializable {
 			//Collections.reverse(score);
 			int number = Math.min(SCORE, score.size());
 			score = score.subList(0, number);
+
 			this.vocabulary = new HashSet<>();
 			for (Tuple<? extends Number, String> t : score) {
 				vocabulary.add(t.getValue());
 			}
 
-			if (DEBUG_FLAG) {
-
-				for (Tuple<? extends Number, String> entry : score) {
-					System.out.println(entry.key + " " + entry.value);
-				}
-
-				//System.out.println(this.p_w_v);
-			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -745,26 +806,5 @@ public class DomainNaiveBayes implements Classifier, Cloneable, Serializable {
 		Evaluation eval = new Evaluation(data);
 		eval.holdoutEvaluationDEBUG(0.33, DomainNaiveBayes.class);
 		System.out.println("Accuracy = " + eval.accuracy());
-		/*Instances test = new Instances(data, "tst.txt", "\t");
-		test.print();
-		DomainNaiveBayes c = new DomainNaiveBayes();
-		c.buildClassifier(data);
-		Instances labeled = c.classify(test);
-		labeled.print();*/
 	}
 }
-
-// SCROE = 1000
-
-//0.89 NO STEMMING
-//0.88 STEMMING
-//0.88 STEMMING
-
-// SCROE = 500
-// 0.87 STEMMING
-
-//SCORE = 800
-// 0.879 STEMMING
-
-//SCORE = 1500
-// 0.87 STEMMING
