@@ -20,6 +20,7 @@ public class DomainNaiveBayes implements Classifier, Cloneable, Serializable {
 	private HashMap<String, Double> distribution = new HashMap<String, Double>();
 	private final boolean DEBUG_FLAG = true;
 	private static final boolean USE_STEMMING = true;
+	private final int SCORE = 1000;
 
 	// TODO zeige klassen verteilung für wörter statt anzahl
 	private static final String[] FILTER_LIST = {"this", "is", "in", "the",
@@ -367,30 +368,55 @@ public class DomainNaiveBayes implements Classifier, Cloneable, Serializable {
 		return count;
 	}
 
+/*
+	private double score(String[] words, String str) {
+		double score = 0.0;
+		//double test = 0.0;
+		double p_w = 0.0;
 
-	 private double score(String[] words, String str) {
-		 double score = 0.0;
-		 //double test = 0.0;
-		 double p_w = 0.0;
+		for (Map.Entry<String, Double> v : this.p_v.entrySet()) {
+			double p_w_v = this.p_w_v.get(new Tuple(str, v.getKey()));
+			double p_v = v.getValue();
+			p_w += p_w_v * p_v;
+		}
 
-		 for (Map.Entry<String, Double> v : this.p_v.entrySet()) {
-			 double p_w_v = this.p_w_v.get(new Tuple(str, v.getKey()));
-			 double p_v = v.getValue();
-			 p_w += p_w_v * p_v;
-		 }
-
-		 // Wahrscheinlichkeit für v - Wahrscheinlichkeit für v unter w
-		 for (Map.Entry<String, Double> v : this.p_v.entrySet()) {
+		// Wahrscheinlichkeit für v - Wahrscheinlichkeit für v unter w
+		for (Map.Entry<String, Double> v : this.p_v.entrySet()) {
 			double p_w_v = this.p_w_v.get(new Tuple(str, v.getKey()));
 			double p_v = v.getValue();
 			double p_v_w = (p_w_v * p_v) / p_w;
 			double dif = p_v - p_v_w;
 			//test += p_v_w;
 			score += dif * dif;
-		 }
-		 //System.out.println(test);
-		 //ohne count 93%
-		 return -Math.sqrt(score);// * count(words, str);
+		}
+		//System.out.println(test);
+		//ohne count 93%
+		return -Math.sqrt(score);// * count(words, str);
+	} */
+
+
+	private double score(String[] words, String str) {
+		double score = 0.0;
+		double p_w = 0.0;
+
+		for (Map.Entry<String, Double> v : this.p_v.entrySet()) {
+			double p_w_v = this.p_w_v.get(new Tuple(str, v.getKey()));
+			double p_v = v.getValue();
+			p_w += p_w_v * p_v;
+		}
+
+		// Wahrscheinlichkeit für v - Wahrscheinlichkeit für v unter w
+		for (Map.Entry<String, Double> v : this.p_v.entrySet()) {
+			double p_w_v = this.p_w_v.get(new Tuple(str, v.getKey()));
+			double p_v = v.getValue();
+			double p_v_w = (p_w_v * p_v) / p_w;
+			double p_v_wc = p_v - p_v_w * p_w;
+			double p_wc = 1 - p_w;
+
+			score += p_v_w * Math.log(p_v_w / (p_v * p_w));
+			score += p_v_wc * Math.log(p_v_wc / (p_v * p_wc));
+		}
+		return score;
 	}
 
 	/* private double score(String[] words, String str) {
@@ -576,7 +602,8 @@ public class DomainNaiveBayes implements Classifier, Cloneable, Serializable {
 
 			Collections.sort(score);
 			//Collections.reverse(score);
-			score = score.subList(0, 1000);
+			int number = Math.min(SCORE, score.size());
+			score = score.subList(0, number);
 			this.vocabulary = new HashSet<>();
 			for (Tuple<? extends Number, String> t : score) {
 				vocabulary.add(t.getValue());
