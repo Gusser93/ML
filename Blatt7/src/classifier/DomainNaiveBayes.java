@@ -27,13 +27,15 @@ Test results:
 
 
 package classifier;
-import wordprocessing.WordParser;
+
 import dataset.Attribute;
 import dataset.AttributeType;
 import dataset.Instance;
 import dataset.Instances;
-import evaluation.Evaluation;
+import wordprocessing.WordParser;
 
+import java.io.File;
+import java.io.FileWriter;
 import java.io.Serializable;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -343,6 +345,22 @@ public class DomainNaiveBayes implements Classifier, Cloneable, Serializable {
 				thread.join();
 			}
 
+			/*
+			// mit: 91,6%
+			// ohne: 92,65%
+			//Normalisieren
+			for (Map.Entry<Map.Entry<String, String>, Double> entry1 : p_w_v
+					.entrySet()) {
+				Map.Entry c = entry1.getKey();
+				double temp = 0.0;
+				for (Map.Entry<Map.Entry<String, String>, Double> entry2 : p_w_v
+						.entrySet()) {
+					temp += entry2.getValue();
+				}
+				double result = entry1.getValue() / temp;
+				p_w_v.put(c, result);
+			}*/
+
 			List<Tuple<Double, String>> score = new LinkedList<>();
 
 			for (String word : vocabulary) {
@@ -442,8 +460,20 @@ public class DomainNaiveBayes implements Classifier, Cloneable, Serializable {
 	public static void main(String[] args) throws Exception {
 		Instances data = new Instances("trg.txt", "\t");
 		data.setClassIndex(0);
-		Evaluation eval = new Evaluation(data);
-		eval.holdoutEvaluationDEBUG(0.33, DomainNaiveBayes.class);
-		System.out.println("Accuracy = " + eval.accuracy());
+		//Evaluation eval = new Evaluation(data);
+		//eval.holdoutEvaluationDEBUG(0.33, DomainNaiveBayes.class);
+		//eval.holdoutEvaluation(1, 1.0/3, DomainNaiveBayes.class);
+		//System.out.println("Accuracy = " + eval.accuracy());
+
+		Instances test = new Instances(data, "tst.txt", "\t");
+		//System.out.println(test);
+		DomainNaiveBayes c = new DomainNaiveBayes();
+		c.buildClassifier(data);
+		Instances labeled = c.classify(test);
+		//System.out.println(labeled);
+		File out = new File("out.txt");
+		FileWriter writer = new FileWriter(out);
+		writer.write(labeled.toString());
+		writer.close();
 	}
 }

@@ -125,7 +125,7 @@ public class Instance {
 		for (int i = 0; i < this.values.size(); i++) {
 			String value = this.stringValue(i);
 			result.append(value);
-			result.append(" ");
+			result.append(",");
 		}
 		return result.toString();
 	}

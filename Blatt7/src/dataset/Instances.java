@@ -183,10 +183,16 @@ public class Instances {
 		return value.startsWith("\"") && value.endsWith("\"");
 	}
 
-	public void print() {
+	public String toString() {
+		StringBuilder result = new StringBuilder();
 		for (Instance instance : this.instances) {
-			System.out.println(instance.toString());
+			result.append(instance.toString());
+			result.append('\n');
 		}
+		if (result.length() > 0) {
+			result.deleteCharAt(result.length() - 1);
+		}
+		return result.toString();
 	}
 
 
