@@ -37,12 +37,15 @@ import evaluation.Evaluation;
 import java.io.Serializable;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.DoubleStream;
 
 public class DomainNaiveBayes implements Classifier, Cloneable, Serializable {
 	// attributes
 	private Set<String> vocabulary = new HashSet<String>();
 	private Map<String, Double> p_v = new ConcurrentHashMap<String, Double>();
 	private Map<Map.Entry<String, String>, Double> p_w_v =
+			new ConcurrentHashMap<Map.Entry<String, String>, Double>();
+	private Map<Map.Entry<String, String>, Double> d_i_j =
 			new ConcurrentHashMap<Map.Entry<String, String>, Double>();
 	private Collection<String> v_js = new ArrayList<String>();
 	private HashMap<String, Double> distribution = new HashMap<String, Double>();
@@ -59,7 +62,8 @@ public class DomainNaiveBayes implements Classifier, Cloneable, Serializable {
 	 * @param <K>
 	 * @param <V>
      */
-	private static class Tuple<K extends Comparable,V> implements Map.Entry<K, V>,
+	private static class Tuple<K extends Comparable,V> implements Map.Entry<K,
+			V>,
 			Comparable<Tuple <? extends K, ?>> {
 		final K key;
 		V value;
@@ -229,6 +233,26 @@ public class DomainNaiveBayes implements Classifier, Cloneable, Serializable {
 		return data.getAttributes().indexOf(attr);
 	}
 
+	private static Tuple<String, List> getDoc(Instances data, String v_j, int
+			attrIdx) {
+		// get subset of instances where traget value equals v_j
+		StringBuilder text_j = new StringBuilder();
+		List<Instance> docs_j = new ArrayList<Instance>();
+		for (Instance i : data.getInstances()) {
+			try {
+				if (v_j.equals(i.classValueString())) {
+					docs_j.add(i);
+
+					text_j.append(i.stringValue(attrIdx));
+					text_j.append(" ");
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+		return new Tuple<String, List>(text_j.toString(), docs_j);
+	}
+
 	//------------------------------------------------------------
 	//------------------------- Classifier -----------------------
 	//------------------------------------------------------------
@@ -270,30 +294,18 @@ public class DomainNaiveBayes implements Classifier, Cloneable, Serializable {
 				// perform each calculation on its own thread
 				Thread t = new Thread() {
 					public void run() {
-						// get subset of instances where traget value equals v_j
-						StringBuilder text_j = new StringBuilder();
-						List<Instance> docs_j = new ArrayList<Instance>();
-						for (Instance i : data.getInstances()) {
-							try {
-								if (v_j.equals(i.classValueString())) {
-									docs_j.add(i);
 
-									text_j.append(i.stringValue(attrIdx));
-									text_j.append(" ");
-								}
-							} catch (Exception e) {
-								e.printStackTrace();
-							}
-						}
-
+						Tuple<String, List> tuple = getDoc(data, v_j, attrIdx);
+						List<String> docs_j= tuple.getValue();
 						// calculate values
-						double exampleSize = (double) data.getInstances().size();
-						double docs_jSize = (double) docs_j.size();
+						double exampleSize = (double)data.getInstances().size();
+						double docs_jSize = (double)docs_j.size();
 						p_v.put(v_j, docs_jSize / exampleSize);
 
 						// count words inside subset
-						String txt = text_j.toString();
+						String txt = tuple.getKey();
 						String[] words = WordParser.getWords(txt);
+
 						int n = words.length;
 
 						ArrayList<Thread> inner_threads = new ArrayList<>();
@@ -303,9 +315,10 @@ public class DomainNaiveBayes implements Classifier, Cloneable, Serializable {
 							// calculate probabilities inside thread
 							Thread inner_t = new Thread() {
 								public void run() {
-									int n_k = WordParser.countWords(words, w_k);
-									double numerator = (double) n_k + 1.0d;
-									double denominator = (double) (n + vocabulary.size());
+									double n_k = WordParser.countWords(words, w_k);
+									double numerator = (double)n_k + 1.0d;
+									double denominator = (double)(n + vocabulary.size());
+
 									p_w_v.put(new Tuple<String, String>(w_k, v_j),
 											numerator / denominator);
 								}
@@ -390,6 +403,9 @@ public class DomainNaiveBayes implements Classifier, Cloneable, Serializable {
 			for (String a : words) {
 				result *= p_w_v.get(new Tuple<>(a, v_j));
 			}
+
+			// CNB
+			result = - result;
 
 			this.distribution.put(v_j, result);
 
