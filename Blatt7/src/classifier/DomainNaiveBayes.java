@@ -624,44 +624,6 @@ public class DomainNaiveBayes implements Classifier, Cloneable, Serializable {
 								public void run() {
 									double n_k = count(words, w_k);
 
-									/*//TWCNB
-									n_k = Math.log(n_k + 1);
-									double num =  v_js.size();
-									double denum = 0.0;
-
-									ConcurrentHashMap<String, List<String>>
-											docs = new ConcurrentHashMap<>();
-									for (String v_j2 : v_js) {
-										docs.put(v_j2, getDoc(data,
-												v_j2, attrIdx)
-												.getValue());
-
-									}
-									for (Map.Entry<String, List<String>> e :
-											docs.entrySet()) {
-										List<String> doc = e.getValue();
-										String v_j2 = e.getKey();
-										if (doc.contains(v_j2)) {
-											denum++;
-										}
-									}
-
-									n_k *= Math.log(num / denum);
-									Vector<Double> somethings = new Vector<>();
-									double something = 0.0;
-
-
-									for (String w_k2 : vocabulary) {
-
-										double count = count(words, w_k2);
-										somethings.add(count * count);
-									}
-
-									for (Double d : somethings) {
-										something += d;
-									}
-									n_k /= Math.sqrt(something);
-									*/
 									double numerator = (double)n_k + 1.0d;
 									double denominator = (double)(n + vocabulary.size());
 									p_w_v.put(new Tuple<String, String>(w_k, v_j),
