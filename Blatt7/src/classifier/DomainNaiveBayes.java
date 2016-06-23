@@ -1,11 +1,10 @@
 package classifier;
+import dataparsing.Stemmer;
 import dataset.Attribute;
 import dataset.AttributeType;
 import dataset.Instance;
 import dataset.Instances;
 import evaluation.Evaluation;
-
-import dataparsing.Stemmer;
 
 import java.io.Serializable;
 import java.util.*;
@@ -263,7 +262,7 @@ public class DomainNaiveBayes implements Classifier, Cloneable, Serializable {
 	 * @param <K>
 	 * @param <V>
      */
-	private class Tuple<K extends Comparable,V> implements Map.Entry<K,
+	private static class Tuple<K extends Comparable,V> implements Map.Entry<K,
 			V>,
 			Comparable<Tuple <? extends K, ?>> {
 		final K key;
@@ -524,6 +523,25 @@ public class DomainNaiveBayes implements Classifier, Cloneable, Serializable {
 		return data.getAttributes().indexOf(attr);
 	}
 
+	private static Tuple<String, List> getDoc(Instances data, String v_j, int
+			attrIdx)
+			throws Exception {
+
+		// get subset of instances where traget value equals v_j
+		StringBuilder text_j = new StringBuilder();
+		List<Instance> docs_j = new ArrayList<Instance>();
+		for (Instance i : data.getInstances()) {
+			//if (v_j.equals(i.classValueString())) {
+			if (!v_j.equals(i.classValueString())) { //CNF
+				docs_j.add(i);
+
+				text_j.append(i.stringValue(attrIdx));
+				text_j.append(" ");
+			}
+		}
+		return new Tuple<String, List>(text_j.toString(), docs_j);
+	}
+
 	//------------------------------------------------------------
 	//------------------------- Classifier -----------------------
 	//------------------------------------------------------------
@@ -559,36 +577,61 @@ public class DomainNaiveBayes implements Classifier, Cloneable, Serializable {
 			}
 			// iterate over values
 			for (String v_j : this.v_js) {
-				// get subset of instances where traget value equals v_j
-				StringBuilder text_j = new StringBuilder();
-				List<Instance> docs_j = new ArrayList<Instance>();
-				for (Instance i : data.getInstances()) {
-						if (v_j.equals(i.classValueString())) {
-							docs_j.add(i);
 
-							text_j.append(i.stringValue(attrIdx));
-							text_j.append(" ");
-						}
-				}
-
+				Tuple<String, List> tuple = getDoc(data, v_j, attrIdx);
+				List<String> docs_j= tuple.getValue();
 				// calculate values
 				double exampleSize = (double)data.getInstances().size();
 				double docs_jSize = (double)docs_j.size();
 				p_v.put(v_j, docs_jSize / exampleSize);
 
 				// count words inside subset
-				String txt = text_j.toString();
+				String txt = tuple.getKey();
 				String[] words = getWords(txt);
 				int n = words.length;
 
 				// iterate over vocabulary
 				for (String w_k : vocabulary) {
-					int n_k = count(words, w_k);
+					double n_k = count(words, w_k);
+
+					//TWCNB
+					n_k = Math.log(n_k + 1);
+					double num =  this.v_js.size();
+					double denum = 0.0;
+
+					for (String v_j2 : this.v_js) {
+						List<String> doc = getDoc(data, v_j2, attrIdx)
+								.getValue();
+						if (doc.contains(v_j2)) {
+							denum++;
+						}
+					}
+					n_k *= Math.log(num / denum);
+					double something = 0.0;
+
+					for (String w_k2 : vocabulary) {
+						double count = count(words, w_k2);
+						something += count * count;
+					}
+					n_k /= Math.sqrt(something);
+
 					double numerator = (double)n_k + 1.0d;
 					double denominator = (double)(n + vocabulary.size());
 					p_w_v.put(new Tuple<String, String>(w_k, v_j),
 							numerator / denominator);
 				}
+			}
+
+			for (Map.Entry<Map.Entry<String, String>, Double> entry1 : p_w_v
+					.entrySet()) {
+				Map.Entry c = entry1.getKey();
+				double temp = 0.0;
+				for (Map.Entry<Map.Entry<String, String>, Double> entry2 : p_w_v
+						.entrySet()) {
+					temp += entry2.getValue();
+				}
+				double result = entry1.getValue() / temp;
+				p_w_v.put(c, result);
 			}
 
 			List<Tuple<Double, String>> score = new LinkedList<>();
@@ -656,6 +699,9 @@ public class DomainNaiveBayes implements Classifier, Cloneable, Serializable {
 			for (String a : words) {
 				result *= p_w_v.get(new Tuple<>(a, v_j));
 			}
+
+			// CNB
+			result = - result;
 
 			this.distribution.put(v_j, result);
 
