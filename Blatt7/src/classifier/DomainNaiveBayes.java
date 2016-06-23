@@ -14,7 +14,7 @@ Test results:
 |  2000     |    false         |  0.911 |
 -----------------------------------------
 |  2500     |    true          |  0.88  |
-|  2500     |  false           | 0.914  |
+|  2500     |    false         | 0.914  |
 -----------------------------------------
 |  3000     |    true          |  0.87  |
 |  3000     |    false         |  0.912 |
@@ -27,7 +27,7 @@ Test results:
 
 
 package classifier;
-import dataparsing.Stemmer;
+import wordprocessing.WordParser;
 import dataset.Attribute;
 import dataset.AttributeType;
 import dataset.Instance;
@@ -38,8 +38,10 @@ import java.io.Serializable;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class DomainNaiveBayes implements Classifier, Cloneable, Serializable {
+import static wordprocessing.WordParser.getWords;
 
+public class DomainNaiveBayes implements Classifier, Cloneable, Serializable {
+	// attributes
 	private Set<String> vocabulary = new HashSet<String>();
 	private Map<String, Double> p_v = new ConcurrentHashMap<String, Double>();
 	private Map<Map.Entry<String, String>, Double> p_w_v =
@@ -48,240 +50,9 @@ public class DomainNaiveBayes implements Classifier, Cloneable, Serializable {
 			new ConcurrentHashMap<Map.Entry<String, String>, Double>();
 	private Collection<String> v_js = new ArrayList<String>();
 	private HashMap<String, Double> distribution = new HashMap<String, Double>();
-	private static final boolean USE_STEMMING = true;
+
+	// Configuration
 	private final int SCORE = 2500;
-
-	// TODO zeige klassen verteilung für wörter statt anzahl
-	private static final String[] FILTER_LIST = {"this", "is", "in", "the",
-			"of", "with", "been", "they", "an", "as","be", "are", "may",
-			"such", "to", "that", "cannot", "only", "has", "which", "no",
-			"some", "for", "not", "and", "match", "among", "from", "we",
-			"was", "by", "these", "have", "were", "two", "on", "other", "at",
-			"also", "or", "but", "one", "it", "its", "all", "three", "most",
-			"here", "both", "than", "previously", "open", "known", "their",
-			"using", "new", "showed", "more", "those", "found", "into",
-			"many", "high", "different", "several", "within", "single",
-			"there", "used", "important", "each", "well", "number", "large",
-			"first", "four", "suggest", "however", "can", "our", "suggests",
-			"shown", "indicated", "very", "pathogen", "extensive", "evolution", 
-			"had", "contrast", "reveals", "responsible", "indicates", "least", 
-			"contained", "differences", "studies", "required", "total", 
-			"primary", "about", "when", "study", "thus", "product", "products", 
-			"shows", "same", "contain", "through", "detected", "any", "small", 
-			"closely", "five", "could", "during", "complex", "although", 
-			"compared", "unique", "common", "identity", "show", "approximately",
-			"suggesting", "containing", "data", "results", "highly", "report", 
-			"present", "related", "similar", "reading", "between", "contains",
-			"connect", "illustrated", "orderly", "introducing", "directing",
-			"cut", "house", "manners", "sixteen", "built", "going", "publicly",
-			"text", "widest", "informations", "minimally", "childhood", "look",
-			"disrupt", "lose", "theory", "logical", "loose", "turns", "forth",
-			"grew", "receiving", "older", "happened", "game", "electric",
-			"unreported", "scoring", "keeping", "predictive", "familiar",
-			"needs", "triggered", "easily", "manipulation", "unbroken",
-			"suggeste", "similarily", "seek", "joins", "formyl", "ruled",
-			"thin", "know", "deeply", "get", "power", "self", "depended",
-			"recognizes", "success", "sampled", "focus", "delivered", "instant",
-			"beneath", "quantify", "accidentally", "consecutive", "summarized",
-			"combining", "so", "control", "caused", "higher", "divergence",
-			"repeats", "ability", "apparent", "multiple", "further",
-			"development", "composed", "relative", "production", "components",
-			"together", "transcriptional", "regulation", "demonstrated",
-			"against", "designated", "additional", "six", "obtained", "degree",
-			"distribution", "causes", "insertion", "factor", "consistent",
-			"similarities", "translation", "variety", "entire", "whereas",
-			"include", "after", "unknown", "second", "while", "length", "long",
-			"assigned", "group", "sites", "either", "specific", "set",
-			"northern", "subunits", "diverse", "model", "content", "part",
-			"described", "ii", "growth", "members", "various", "likely",
-			"identify", "low", "essential", "analysis", "identified",
-			"complete", "determined", "predicted", "revealed", "including",
-			"similarity", "potential", "major", "characterized", "identical",
-			"located", "functional", "role", "corresponding", "reported",
-			"order", "organization", "analyses", "indicate", "addition",
-			"evidence", "factors", "consists", "member", "mass", "cause",
-			"appears", "close", "over", "possible", "position", "largest",
-			"recently", "appear", "range", "available", "mechanism",
-			"probably", "information", "suggested", "represents", "whole",
-			"active", "end", "early", "origin", "identification",
-			"consensus", "therefore", "iii", "iv", "vi", "vii", "viii",
-			"far", "third", "database", "horizontal", "experiments",
-			"overall", "deletion", "typical", "strong", "majority", "whose",
-			"eight", "use", "increased", "understanding", "provide",
-			"provides", "methods", "databases", "finding", "forms",
-			"completely", "deduced", "under", "did", "pair", "them",
-			"another", "duplication", "start", "furthermore", "yet",
-			"nearly", "normal", "weight", "like", "half", "being", "shared",
-			"does", "highest", "confirmed", "source", "larger","increase",
-			"unusual", "class", "significantly", "will", "possibly", "rate",
-			"central", "limited", "public", "now", "search", "point",
-			"around", "because", "great", "greatly", "background",
-			"substantial", "partially", "program", "evident", "usage",
-			"independently", "occurrence", "fully", "lower", "negative",
-			"island", "mobile", "local", "belonging", "via", "laboratory",
-			"smaller", "amount", "compare", "origins", "belong", "location",
-			"percent", "outer", "finally", "performed", "unusually",
-			"feature", "amounts", "functionally", "presented", "published",
-			"unlike", "relatively", "per", "wide", "southern", "missing",
-			"implicated", "resulted", "describe", "result", "response",
-			"direct", "strongly", "size", "frequent", "currently",
-			"research", "requires", "continues", "points", "plus", "acts",
-			"tests", "unselected", "orders", "distant", "lesser", "nameley",
-			"test", "noted", "conditions", "resulting", "produced",
-			"incldes", "absent", "positions", "represent"};
-
-	private static final String[] MOST_COMMON_ENGLISH_WORDS = {
-			"the", "and", "to", "of", "a", "I", "in", "was", "he", "that", "it",
-			"his", "her", "you", "as", "had", "with", "for", "she", "not", "at",
-			"but", "be", "my", "on", "have", "him", "is", "said", "me", "which",
-			"by", "so", "this", "all", "from", "they", "no", "were", "if",
-			"would", "or", "when", "what", "there", "been", "one", "could",
-			"very", "an", "who", "them", "Mr", "we", "now", "more", "out",
-			"do", "are", "up", "their", "your", "will", "little", "than",
-			"then", "some", "into", "any", "well", "much", "about", "time",
-			"know", "should", "man", "did", "like", "upon", "such", "never",
-			"only", "good", "how", "before", "other", "see", "must", "am",
-			"own", "come", "down", "say", "after", "think", "made", "might",
-			"being", "Mrs", "again", "great", "two", "can", "go", "over", "too",
-			"here", "came", "old", "thought", "himself", "where", "our", "may",
-			"first", "way", "has", "though", "without", "went", "us", "away",
-			"day", "make", "these", "young", "nothing", "long", "shall", "sir",
-			"back", "don't", "house", "ever", "yet", "take", "every", "hand",
-			"most", "last", "eyes", "its", "miss", "having", "off", "looked",
-			"even", "while", "dear", "look", "many", "life", "still", "mind",
-			"quite", "another", "those", "just", "head", "tell", "better",
-			"always", "saw", "seemed", "put", "face", "let", "took", "poor",
-			"place", "why", "done", "herself", "found", "through", "same",
-			"going", "under", "enough", "soon", "home", "give", "indeed",
-			"left", "get", "once", "mother", "heard", "myself", "rather",
-			"love", "knew", "got", "lady", "room", "something", "yes", "thing",
-			"father", "perhaps", "sure", "heart", "oh", "right", "against",
-			"three", "men", "night", "people", "door", "told", "round",
-			"because", "woman", "till", "felt", "between", "both", "side",
-			"seen", "morning", "began", "whom", "however", "asked", "things",
-			"part", "almost", "moment", "looking", "want", "far", "hands",
-			"gone", "world", "few", "towards", "gave", "friend", "name", "best",
-			"word", "turned", "kind", "cried", "since", "anything", "next",
-			"find", "half", "hope", "called", "nor", "words", "hear", "brought",
-			"set", "each", "replied", "wish", "voice", "whole", "together",
-			"manner", "new", "believe", "course", "least", "years", "answered",
-			"among", "stood", "sat", "speak", "leave", "work", "keep", "taken",
-			"end", "less", "present", "family", "often", "wife", "whether",
-			"master", "coming", "mean", "returned", "evening", "light", "money",
-			"cannot", "whose", "boy", "days", "near", "matter", "suppose",
-			"gentleman", "used", "says", "really", "rest", "business", "full",
-			"help", "child", "sort", "passed", "lay", "small", "behind", "girl",
-			"feel", "fire", "care", "alone", "open", "person", "call", "given",
-			"I'll", "sometimes", "making", "short", "else", "large", "within",
-			"chapter", "true", "country", "times", "ask", "answer", "air",
-			"kept", "hour", "letter", "happy", "reason", "pretty", "husband",
-			"certain", "others", "ought", "does", "known", "it's", "bed",
-			"table", "that's", "ready", "read", "already", "pleasure", "either",
-			"means", "spoke", "taking", "friends", "talk", "hard", "walked",
-			"turn", "strong", "thus", "yourself", "high", "along", "above",
-			"feeling", "glad", "children", "doubt", "nature", "themselves",
-			"black", "hardly", "town", "sense", "saying", "deal", "account",
-			"use", "white", "bad", "everything", "can't", "neither", "wanted",
-			"mine", "close", "return", "dark", "fell", "subject", "bear",
-			"appeared", "fear", "state", "thinking", "also", "point",
-			"therefore", "fine", "case", "doing", "held", "certainly", "walk",
-			"lost", "question", "company", "continued", "fellow", "truth",
-			"water", "possible", "hold", "afraid", "bring", "honour", "low",
-			"ground", "added", "five", "remember", "except", "power", "seeing",
-			"dead", "I'm", "usual", "able", "second", "arms", "late", "opinion",
-			"window", "brother", "live", "four", "none", "death", "arm", "road",
-			"hair", "sister", "entered", "sent", "married", "longer",
-			"immediately", "god", "women", "hours", "ten", "understand", "son",
-			"horse", "wonder", "cold", "beyond", "please", "fair", "became",
-			"sight", "met", "afterwards", "eye", "year", "show", "general",
-			"itself", "silence", "lord", "wrong", "turning", "daughter", "stay",
-			"forward", "O", "interest", "thoughts", "followed", "won't",
-			"different", "opened", "several", "idea", "received", "change",
-			"laid", "strange", "nobody", "fact", "during", "feet", "tears",
-			"run", "purpose", "character", "body", "ran", "past", "order",
-			"need", "pleased", "trouble", "whatever", "dinner", "happened",
-			"sitting", "getting", "there's", "besides", "soul", "ill", "early",
-			"rose", "aunt", "hundred", "minutes", "across", "carried", "sit",
-			"observed", "suddenly", "creature", "conversation", "worse", "six",
-			"quiet", "chair", "doctor", "tone", "standing", "living", "sorry",
-			"stand", "meet", "instead", "wished", "ah", "lived", "try", "red",
-			"smile", "sound", "expected", "silent", "common", "meant", "tried",
-			"until", "mouth", "distance", "occasion", "cut", "marry", "likely",
-			"length", "story", "visit", "deep", "seems", "street", "remained",
-			"become", "led", "speaking", "natural", "giving", "further",
-			"struck", "week", "loved", "drew", "seem", "church", "knows",
-			"object", "ladies", "marriage", "book", "appearance", "pay", "I've",
-			"obliged", "particular", "pass", "thank", "form", "knowing", "lips",
-			"knowledge", "former", "blood", "sake", "fortune", "necessary",
-			"presence", "feelings", "corner", "beautiful", "talking", "spirit",
-			"ago", "foot", "circumstances", "wind", "presently", "comes",
-			"attention", "wait", "play", "easy", "real", "clear", "worth",
-			"cause", "send", "spirits", "chance", "didn't", "view", "pleasant",
-			"party", "beginning", "horses", "stopped", "notice", "duty", "he's",
-			"age", "figure", "leaving", "sleep", "entirely", "twenty", "fall",
-			"promise", "months", "broken", "heavy", "secret", "thousand",
-			"happiness", "comfort", "minute", "act", "human", "fancy",
-			"strength", "showed", "pounds", "nearly", "probably", "captain",
-			"piece", "school", "write", "laughed", "reached", "repeated",
-			"walking", "father's", "heaven", "beauty", "shook", "sun",
-			"waiting", "moved", "bit", "desire", "news", "front", "effect",
-			"laugh", "uncle", "fit", "miles", "handsome", "caught", "hat",
-			"regard", "gentlemen", "supposed", "easily", "impossible", "glass",
-			"resolved", "grew", "consider", "green", "considered", "unless",
-			"stop", "forth", "expect", "perfectly", "altogether", "surprise",
-			"sudden", "free", "exactly", "grave", "carriage", "believed",
-			"service", "angry", "putting", "carry", "everybody", "mentioned",
-			"looks", "scarcely", "society", "affection", "exclaimed", "dress",
-			"die", "earth", "latter", "garden", "step", "perfect",
-			"countenance", "liked", "dare", "pain", "companion", "journey",
-			"paper", "opportunity", "makes", "honest", "arrived", "you'll",
-			"bright", "pity", "directly", "cry", "trust", "fast", "ye", "warm",
-			"danger", "trees", "breakfast", "rich", "engaged", "proper",
-			"talked", "respect", "fixed", "hill", "wall", "determined", "wild",
-			"shut", "top", "plain", "scene", "sweet", "especially", "public",
-			"acquaintance", "forget", "history", "pale", "pray", "books",
-			"afternoon", "man's", "otherwise", "mention", "position", "speech",
-			"gate", "'em", "boys", "yours", "drink", "slowly", "broke",
-			"clothes", "fond", "pride", "watch", "sooner", "settled", "paid",
-			"reply", "tea", "lie", "running", "died", "gentle", "particularly",
-			"allowed", "outside", "placed", "joy", "hearing", "note",
-			"condition", "follow", "begin", "neck", "serious", "hurt",
-			"kindness", "mere", "farther", "changed", "o'clock", "passing",
-			"girls", "force", "situation", "greater", "expression", "eat",
-			"reading", "spoken", "raised", "anybody", "started", "following",
-			"although", "sea", "proud", "future", "quick", "safe", "temper",
-			"laughing", "ears", "difficulty", "meaning", "servant", "sad",
-			"advantage", "appear", "offer", "breath", "opposite", "number",
-			"miserable", "law", "rising", "favour", "save", "twice", "single",
-			"blue", "noise", "stone", "mistress", "surprised", "allow", "spot",
-			"burst", "keeping", "line", "understood", "court", "finding",
-			"direction", "anxious", "pocket", "around", "conduct", "loss",
-			"fresh", "below", "hall", "satisfaction", "land", "telling",
-			"passion", "floor", "break", "lying", "waited", "closed", "meeting",
-			"trying", "seat", "king", "confidence", "offered", "stranger",
-			"somebody", "matters", "noble", "pardon", "private", "sharp",
-			"evil", "weeks", "justice", "hot", "cast", "letters", "youth",
-			"lives", "health", "finished", "hoped", "holding", "touch", "spite",
-			"delight", "bound", "consequence", "rain", "wouldn't", "third",
-			"hung", "ways", "weather", "written", "difference", "kitchen",
-			"she's", "mother's", "persons", "quarter", "promised", "hopes",
-			"brown", "nay", "seven", "simple", "wood", "beside", "middle",
-			"ashamed", "lose", "dreadful", "move", "generally", "cousin",
-			"surely", "satisfied", "bent", "shoulder", "art", "field",
-			"quickly", "thrown", "tired", "share", "pair", "to-morrow",
-			"aware", "colour", "writing", "whenever", "quietly", "fool",
-			"forced", "touched", "smiling", "taste", "dog", "spent", "steps",
-			"worst", "legs", "watched", "ay", "thee", "eight", "worthy",
-			"wrote", "manners", "proceeded", "frightened", "somewhat", "born",
-			"greatest", "charge", "degree", "shame", "places", "ma'am",
-			"couldn't", "tongue", "according", "box", "wine", "filled",
-			"servants", "calling", "fallen", "supper"};
-	private static final Set<String> FILTER1 = new HashSet<>(
-			Arrays.asList(FILTER_LIST));
-	private static final Set<String> FILTER2 = new HashSet<>(
-			Arrays.asList(MOST_COMMON_ENGLISH_WORDS));
-	private static final String FILTER_REGEX = "[A-Za-z][^\\s!.,;:/=@]+";
-	//"[A-Za-z][A-Za-z]+"; //bislang bestes
 
 	//------------------------------------------------------------
 	//----------------------- Inner Tuple class ------------------
@@ -293,8 +64,7 @@ public class DomainNaiveBayes implements Classifier, Cloneable, Serializable {
 	 * @param <V>
      */
 	private static class Tuple<K extends Comparable,V> implements Map.Entry<K,
-			V>,
-			Comparable<Tuple <? extends K, ?>> {
+			V>,	Comparable<Tuple <? extends K, ?>> {
 		final K key;
 		V value;
 		Tuple<K,V> next;
@@ -406,83 +176,6 @@ public class DomainNaiveBayes implements Classifier, Cloneable, Serializable {
 	} */
 
 
-	//------------------------------------------------------------
-	//----------------------- Word processing --------------------
-	//------------------------------------------------------------
-
-	/**
-	 * count how often an element occurs inside the array
-	 * @param arr
-	 * @param objc
-     * @return
-     */
-	private static int count(Object[] arr, Object objc) {
-		int count = 0;
-		for (Object o : arr) {
-			//o nicht arr, oder?
-			if (o.equals(objc)) {
-				count++;
-			}
-		}
-		return count;
-	}
-
-
-	/**
-	 * get all words inside string
-	 * @param s
-	 * @return
-     */
-	private static String[] getWords(String s) {
-		String[] words = s.split("\\s+");
-		for (int i = 0; i < words.length; i++) {
-			words[i] = words[i].replaceAll("[^\\w]", "");
-			// only letters inside the word
-			if (USE_STEMMING && words[i].matches("[a-zA-Z]+")) {
-				// transform our word to the root form
-				String temp = Stemmer.readString(words[i]).get(0);
-
-				if (temp.length() > 5) {
-					words[i] = temp;
-				}
-			}
-		}
-		return words;
-	}
-
-	/**
-	 *
-	 * @param s
-	 * @return
-     */
-	private static String[] getFilteredWords(String s) {
-		String[] words = s.split("\\s+");
-		List<String> wordList = new ArrayList<>();
-		for (int i = 0; i < words.length; i++) {
-			if (words[i].matches(FILTER_REGEX)) {
-				words[i] = words[i].replaceAll("[^\\w]", "");
-				// if only letters inside the word
-				if (USE_STEMMING && words[i].matches("[a-zA-Z]+")) {
-					// transform our word to the root form
-					String temp = Stemmer.readString(words[i]).get(0);
-					// prevent words like 'ha'
-					if (temp.length() > 5) {
-						words[i] = temp;
-					}
-				}
-				wordList.add(words[i]);
-			}
-		}
-		wordList.removeAll(FILTER1);
-		wordList.removeAll(FILTER2);
-		for (String str : wordList) {
-			if (str.length() < 1) {
-				System.out.println(str);
-			}
-		}
-		return wordList.toArray(new String[0]);
-
-	}
 
 	//------------------------------------------------------------
 	//----------------------Classifier helper --------------------
@@ -559,7 +252,7 @@ public class DomainNaiveBayes implements Classifier, Cloneable, Serializable {
 		int attrIdx = getIndexForAttribute(data, notClassAttr);
 		for (Instance i : data.getInstances()) {
 			// split value to get all distinct words
-			String[] filteredWords = getFilteredWords(i.stringValue(attrIdx));
+			String[] filteredWords = WordParser.getFilteredWords(i.stringValue(attrIdx));
 			Collections.addAll(vocabulary, filteredWords);
 		}
 
@@ -588,7 +281,10 @@ public class DomainNaiveBayes implements Classifier, Cloneable, Serializable {
 						List<Instance> docs_j = new ArrayList<Instance>();
 						for (Instance i : data.getInstances()) {
 							try {
-								if (v_j.equals(i.classValueString())) {
+								//MNB
+								// if (v_j.equals(i.classValueString())) {
+								//CNB
+								if (!v_j.equals(i.classValueString())) {
 									docs_j.add(i);
 
 									text_j.append(i.stringValue(attrIdx));
@@ -615,10 +311,10 @@ public class DomainNaiveBayes implements Classifier, Cloneable, Serializable {
 							// calculate probabilities inside thread
 							Thread inner_t = new Thread() {
 								public void run() {
-									double n_k = count(words, w_k);
-
+									double n_k = WordParser.countWords(words, w_k);
 									double numerator = (double)n_k + 1.0d;
 									double denominator = (double)(n + vocabulary.size());
+
 									p_w_v.put(new Tuple<String, String>(w_k, v_j),
 											numerator / denominator);
 								}
@@ -705,7 +401,7 @@ public class DomainNaiveBayes implements Classifier, Cloneable, Serializable {
 			}
 
 			// CNB
-			//result = - result;
+			result = - result;
 
 			this.distribution.put(v_j, result);
 
