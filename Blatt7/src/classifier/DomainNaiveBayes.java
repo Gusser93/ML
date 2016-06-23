@@ -473,7 +473,7 @@ public class DomainNaiveBayes implements Classifier, Cloneable, Serializable {
 		//System.out.println(labeled);
 		File out = new File("out.txt");
 		FileWriter writer = new FileWriter(out);
-		writer.write(labeled.toString());
+		writer.write(labeled.toString("\t"));
 		writer.close();
 	}
 }
