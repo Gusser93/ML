@@ -37,7 +37,8 @@ import evaluation.Evaluation;
 import java.io.Serializable;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.DoubleStream;
+
+import static wordprocessing.WordParser.getWords;
 
 public class DomainNaiveBayes implements Classifier, Cloneable, Serializable {
 	// attributes
@@ -63,8 +64,7 @@ public class DomainNaiveBayes implements Classifier, Cloneable, Serializable {
 	 * @param <V>
      */
 	private static class Tuple<K extends Comparable,V> implements Map.Entry<K,
-			V>,
-			Comparable<Tuple <? extends K, ?>> {
+			V>,	Comparable<Tuple <? extends K, ?>> {
 		final K key;
 		V value;
 		Tuple<K,V> next;
@@ -233,25 +233,6 @@ public class DomainNaiveBayes implements Classifier, Cloneable, Serializable {
 		return data.getAttributes().indexOf(attr);
 	}
 
-	private static Tuple<String, List> getDoc(Instances data, String v_j, int
-			attrIdx) {
-		// get subset of instances where traget value equals v_j
-		StringBuilder text_j = new StringBuilder();
-		List<Instance> docs_j = new ArrayList<Instance>();
-		for (Instance i : data.getInstances()) {
-			try {
-				if (v_j.equals(i.classValueString())) {
-					docs_j.add(i);
-
-					text_j.append(i.stringValue(attrIdx));
-					text_j.append(" ");
-				}
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		}
-		return new Tuple<String, List>(text_j.toString(), docs_j);
-	}
 
 	//------------------------------------------------------------
 	//------------------------- Classifier -----------------------
@@ -295,17 +276,32 @@ public class DomainNaiveBayes implements Classifier, Cloneable, Serializable {
 				Thread t = new Thread() {
 					public void run() {
 
-						Tuple<String, List> tuple = getDoc(data, v_j, attrIdx);
-						List<String> docs_j= tuple.getValue();
+						// get subset of instances where traget value equals v_j
+						StringBuilder text_j = new StringBuilder();
+						List<Instance> docs_j = new ArrayList<Instance>();
+						for (Instance i : data.getInstances()) {
+							try {
+								//MNB
+								// if (v_j.equals(i.classValueString())) {
+								//CNB
+								if (!v_j.equals(i.classValueString())) {
+									docs_j.add(i);
+
+									text_j.append(i.stringValue(attrIdx));
+									text_j.append(" ");
+								}
+							} catch (Exception e) {
+								e.printStackTrace();
+							}
+						}
 						// calculate values
 						double exampleSize = (double)data.getInstances().size();
 						double docs_jSize = (double)docs_j.size();
 						p_v.put(v_j, docs_jSize / exampleSize);
 
 						// count words inside subset
-						String txt = tuple.getKey();
-						String[] words = WordParser.getWords(txt);
-
+						String txt = text_j.toString();
+						String[] words = getWords(txt);
 						int n = words.length;
 
 						ArrayList<Thread> inner_threads = new ArrayList<>();
@@ -381,7 +377,7 @@ public class DomainNaiveBayes implements Classifier, Cloneable, Serializable {
 
 		// get doc
 		String doc_str = instance.stringValue(attrIdx);
-		String[] doc = WordParser.getWords(doc_str);
+		String[] doc = getWords(doc_str);
 
 		// indices
 		List<String> words = new ArrayList<String>();
