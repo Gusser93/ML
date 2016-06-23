@@ -404,9 +404,6 @@ public class DomainNaiveBayes implements Classifier, Cloneable, Serializable {
 				result *= p_w_v.get(new Tuple<>(a, v_j));
 			}
 
-			// CNB
-			result = - result;
-
 			this.distribution.put(v_j, result);
 
 			if (result > argmax) {
