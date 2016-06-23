@@ -26,7 +26,7 @@ Test results:
 
 
 
-		package classifier;
+package classifier;
 import dataset.Attribute;
 import dataset.AttributeType;
 import dataset.Instance;
