@@ -120,13 +120,23 @@ public class Instance {
 		this.classIndex = index;
 	}
 
-	public String toString() {
+	public String toString(String delimiter) {
 		StringBuilder result = new StringBuilder();
 		for (int i = 0; i < this.values.size(); i++) {
 			String value = this.stringValue(i);
-			result.append(value);
-			result.append(" ");
+			if (this.attribute(i).isType(AttributeType.string)) {
+				result.append("\"");
+				result.append(value);
+				result.append("\"");
+			} else {
+				result.append(value);
+			}
+			result.append(delimiter);
 		}
 		return result.toString();
+	}
+
+	public String toString() {
+		return this.toString(",");
 	}
 }
