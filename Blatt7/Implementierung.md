@@ -15,4 +15,4 @@ Zu diesen Klassen zählen: `Attribute`, `AttributeType`, `Instance`, `Instances`
 ###performance
 - Stemming: Wörter werden auf ihren Wortstamm zurückgeführt z.B. programming, programmed => programm, program (Keine signifikante Verbesserung der accuracy)
 - Filter: Häufigste Wörter, sowie ausgewählte Wörter werden herausgefiltert (Erhört accuracy um rund 35%)
-- Score: 
+- Score: siehe Paper von McCallum
