@@ -20,7 +20,7 @@
 
 \newpage
 
-\section*{Nr.1}
+\section*{Maximum Margin Hyperplane - Dimensionality}
 Sei $x_1$ eine Instanz der Klasse 1 und $x_2$ eine Instanz der Klasse 2.\\
 Hyperebene: $f(x) = (w\cdot x) + b$\\
 Bedingung: $|y((w\cdot x) +b)| = 1$\\
@@ -29,4 +29,18 @@ Herleitung des Optimierungsproblems:
 \[ f(x_1) - f(x_2) = 2 = w\cdot x_1 + b - w\cdot x_2 - b = w\cdot(x_1-x_2) \]
 \[ \Rightarrow \text{zu maximieren: }\frac{w}{||w||}\cdot(x_1 - x_2) = \frac{2}{||w||} \]
 Daraus folgt, dass je eine Instanz pro Klasse ausreicht, um das Optimierungsproblem der maximum-margin Hyperplane zu definieren und somit eine eindeutige Lösung zu erhalten. 
+
+\section*{Maximum Margin Hyperplane - Constraint}
+\[I )~~~y_n (w_1^T \Phi(x_n) + b_1) \geq 1 \]
+\[II)~~~y_n (w_2^T \Phi(x_n) + b_2) \geq \gamma \]
+\[ \Leftrightarrow \frac{y_n (w_2^T \Phi(x_n) + b_2)}{\gamma} \geq 1 \]
+\[ \Leftrightarrow y_n \left (\frac{w_2^T}{\gamma} \Phi(x_n) + \frac{b_2}{\gamma} \right) \geq 1 \]
+
+\[Mit~~ I~~in ~~II: \]
+\[ \Leftrightarrow y_n \left (\frac{w_2^T}{\gamma} \Phi(x_n) + \frac{b_2}{\gamma} \right) = y_n (w_1^T \Phi(x_n) + b_1) \]
+\[ \Leftrightarrow \frac{w_2^T}{\gamma} \Phi(x_n) + \frac{b_2}{\gamma} = w_1^T \Phi(x_n) + b_1 \]
+\[ \Rightarrow \frac{w_2^T}{\gamma} \Phi(x_n) = w_1^T \Phi(x_n) \]
+\[ \gamma^{-1} w_2^T \Phi(X_n) = w_1^T \Phi(x_n)~~\land~~w_1 \cdot \gamma = w_2 \]
+\[ \Rightarrow \Phi(x_n) = \Phi(x_n) \]
+\[q.e.d\]
 \end{document}
