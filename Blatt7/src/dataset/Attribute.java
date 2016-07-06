@@ -41,6 +41,7 @@ public class Attribute {
 			}
 			this.values.put(size++, value);
 		}
+
 	}
 
 	protected int getIndex(String value) {
