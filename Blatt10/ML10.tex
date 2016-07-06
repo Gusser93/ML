@@ -6,7 +6,7 @@
 \geometry{left=25mm, right=15mm, bottom=25mm}
 \setlength{\parindent}{0em} 
 \setlength{\headheight}{0em} 
-\title{Veranstaltung\\ Blatt i}
+\title{Machine Learning\\ Blatt 10}
 \author{Markus Vieth\and David Klopp\and Christian Stricker}
 \date{\today}
 \input{../head/lstlisting.tex}
@@ -21,5 +21,12 @@
 \newpage
 
 \section*{Nr.1}
-
+Sei $x_1$ eine Instanz der Klasse 1 und $x_2$ eine Instanz der Klasse 2.\\
+Hyperebene: $f(x) = (w\cdot x) + b$\\
+Bedingung: $|y((w\cdot x) +b)| = 1$\\
+Größe der Margin: $\frac{w}{||w||} \cdot (x_1 - x_2)$\\
+Herleitung des Optimierungsproblems:
+\[ f(x_1) - f(x_2) = 2 = w\cdot x_1 + b - w\cdot x_2 - b = w\cdot(x_1-x_2) \]
+\[ \Rightarrow \text{zu maximieren: }\frac{w}{||w||}\cdot(x_1 - x_2) = \frac{2}{||w||} \]
+Daraus folgt, dass je eine Instanz pro Klasse ausreicht, um das Optimierungsproblem der maximum-margin Hyperplane zu definieren und somit eine eindeutige Lösung zu erhalten. 
 \end{document}
