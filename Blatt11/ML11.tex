@@ -1,0 +1,40 @@
+\documentclass[a4paper,11pt,twoside]{scrartcl}
+\usepackage[T1]{fontenc}
+\usepackage{subcaption}
+\usepackage[utf8]{inputenc}
+\usepackage{ngerman, eucal, mathrsfs, amsfonts, bbm, amsmath, amssymb, stmaryrd,graphicx, array, geometry, color, wrapfig, float, hyperref}
+\geometry{left=25mm, right=15mm, bottom=25mm}
+\setlength{\parindent}{0em} 
+\setlength{\headheight}{0em} 
+\title{Machine Learning\\ Blatt 11}
+\author{Markus Vieth\and David Klopp\and Christian Stricker}
+\date{\today}
+\input{../head/lstlisting.tex}
+\begin{document}
+
+\newcommand{\cor}[1]{\textcolor{red}{\textit{#1}}}
+\maketitle
+\cleardoublepage
+\pagestyle{myheadings}
+\markboth{Markus Vieth,  David Klopp, Christian Stricker}{Markus Vieth, David Klopp, Christian Stricker}
+
+\newpage
+
+\section*{Nr.1}
+\subsection*{Skalarprodukt}
+\subsubsection*{Symmetrie}
+\[ k(x,y) = <x,y> = \sum_{i=1}^{n} x_i\cdot y_i = \sum_{i=1}^{n} y_i\cdot x_i = <y,x> = k(y,x) \]
+\subsubsection*{zz. $\forall c_1, \ldots, c_m \in \mathbb{R}: \sum_{i,j = 1}^m c_ic_jk(x_i, x_j) \ge 0$}
+\[ \sum_{i,j = 1}^{m} c_i c_j k(x_i, x_j) = \sum_{i,j = 1}^{m} \left( c_ic_j\sum_{k=1}^{n} ({x_i}_k, {x_j}_k) \right) = \sum_{k = 1}^{n}\sum_{i=1}^{m}\sum_{j=1}^{m}(c_i{x_i}_k \cdot c_j{x_j}_k)  \]
+\[ = \sum_{k=1}^{n}\left( \sum_{i=1}^{m} c_i{x_i}_k \cdot \sum_{j=1}^{m}c_j{x_j}_k \right) = \sum_{k=1}^{n}\left( \sum_{i=1}^{m}c_i{x_i}_k \right)^2 \ge 0 \]
+$\Rightarrow ~ <x,y>$ ist ein Kernel.
+\begin{flushright}
+	q.e.d.
+	\end{flushright}
+\subsection*{Polynomieller Kernel}
+\[ k(x, y) = (\sum_{i=1}^n x_i y_i)^2 = \sum_{i=1}^n x_i y_i \cdot \sum_{i=1}^n x_i y_i = <x,y> \cdot <x,y> \]
+$\Rightarrow$ Kernel, da Produkt 2er Kernel (wie oben gezeigt).
+\begin{flushright}
+	q.e.d.
+\end{flushright}
+\end{document}
